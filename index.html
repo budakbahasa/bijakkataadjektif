@@ -2,14 +2,19 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bijak Kata Adjektif - Pengembaraan</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- TAMBAHAN: Pustaka jsPDF untuk Muat Turun PDF Sijil (Vektor) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
+        /* FON UTAMA CENTURY GOTHIC */
         @import url('https://fonts.googleapis.com/css2?family=Century+Gothic:wght@400;700&display=swap');
         
         body { 
@@ -22,14 +27,17 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* REKA BENTUK BUTANG & KAD 3D WOW */
         .btn-3d {
             box-shadow: 0 8px 0 rgba(0,0,0,0.2), 0 15px 20px rgba(0,0,0,0.3);
             transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative; top: 0;
+            user-select: none;
         }
         .btn-3d:active { top: 8px; box-shadow: 0 0 0 rgba(0,0,0,0), 0 5px 10px rgba(0,0,0,0.2); }
         .card-wow { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 6px solid #fff; }
 
+        /* ANIMASI UI */
         .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes popIn { 0% { transform: scale(0.6) translateY(50px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
         
@@ -37,36 +45,29 @@
         .float-fast { animation: floating 2s ease-in-out infinite; }
         @keyframes floating { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } }
 
-        /* ANIMASI ENJIN PERMAINAN ARKED SEBENAR */
-        .game-bg-scroll { animation: bgScroll 3s linear infinite; }
-        @keyframes bgScroll { 0% { background-position: 0 0; } 100% { background-position: -200px 0; } }
-        
-        .obstacle-hiasan { animation: obsHiasan 2.5s linear infinite; }
-        @keyframes obsHiasan { 0% { left: 100%; } 100% { left: -20%; } }
+        .treasure-map-bg { background-image: url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><path d="M54.627 0l.83.83v58.34l-.83.83H5.373l-.83-.83V.83l.83-.83h49.254zm-1.66 1.66H7.034v56.68h45.933V1.66z" fill="%23ffffff" fill-opacity="0.1" fill-rule="evenodd"/></svg>'); }
 
-        .box-datang { animation: boxDatang 1.5s linear forwards; }
-        @keyframes boxDatang { 0% { left: 100%; } 100% { left: 20%; } }
-
-        .hero-jump { animation: heroJump 0.6s ease-out; }
-        @keyframes heroJump { 0%, 100% { bottom: 40px; transform: scale(1); } 50% { bottom: 180px; transform: scale(1.1) rotate(5deg); } }
-
-        /* KOD CETAKAN SIJIL YANG SEMPURNA */
+        /* CSS KHAS CETAKAN VEKTOR SIJIL */
         @media print {
             @page { size: A4 landscape; margin: 0; }
             body, html { background: white !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             body > *:not(#app) { display: none !important; }
-            header, nav, footer, .hide-on-print { display: none !important; }
+            header, nav, .hide-on-print { display: none !important; }
             #app, main, .pop-in, .card-wow, #sijil-cetak-wrapper { display: block !important; transform: none !important; animation: none !important; overflow: visible !important; box-shadow: none !important; background: transparent !important; border: none !important; margin: 0 !important; padding: 0 !important; position: static !important; }
             body * { visibility: hidden; }
             #sijil-cetak, #sijil-cetak * { visibility: visible; }
             #sijil-cetak { position: absolute !important; top: 0 !important; left: 0 !important; width: 297mm !important; height: 210mm !important; margin: 0 !important; background: white !important; page-break-after: avoid; page-break-inside: avoid; }
         }
+        
+        .bar-chart-bg { background: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,0,0,0.05) 39px, rgba(0,0,0,0.05) 40px); }
+        .hide-on-desktop { display: none; }
+        @media (max-width: 768px) { .hide-on-desktop { display: flex; } }
     </style>
 </head>
 <body class="text-slate-800">
 
     <div id="app" class="flex flex-col relative min-h-screen pb-10">
-        <!-- Render App Content -->
+        <!-- Render melalui JS -->
     </div>
 
     <script>
@@ -75,54 +76,62 @@
         const KATEGORI = {
             sifat: {
                 nama: "Sifat / Keadaan", ikon: "😇", warna: "from-blue-400 to-blue-600",
-                nota: { definisi: "Menerangkan sifat, keadaan, atau perwatakan.", contoh: ["Baik 😇", "Cerdik 🧠", "Berani 🦸‍♂️", "Sihat 💪", "Lemah 🤒"], ayat: ["Ali disukai ramai kerana dia seorang yang <b>baik</b>.", "Kucing itu sangat <b>cerdik</b> menangkap tikus.", "Pahlawan yang <b>berani</b> itu mara ke hadapan.", "Datuk kelihatan <b>sihat</b> selepas berehat panjang.", "Badannya berasa <b>lemah</b> akibat demam."] },
-                latihan: [ ["Budak yang ____ itu selalu membantu ibunya.", "rajin", "malas", "jahat", "bising"], ["Pemandangan di tepi pantai itu amat ____.", "indah", "busuk", "bising", "hodoh"], ["Harimau ialah seekor haiwan yang amat ____.", "garang", "penakut", "jinak", "lemah"], ["Udara di pergunungan itu sungguh ____.", "segar", "kotor", "panas", "busuk"], ["Pakaian seragam mestilah sentiasa ____.", "bersih", "kotor", "busuk", "comot"], ["Pesakit itu masih ____ dan perlukan rehat.", "lemah", "kuat", "sihat", "cergas"], ["Kerja susah menjadi ____ jika bekerjasama.", "mudah", "berat", "payah", "sukar"], ["Sungai itu amat ____ kerana banyak sampah.", "kotor", "bersih", "jernih", "suci"], ["Angin bertiup ____ pada petang ini.", "kencang", "lemah", "lembut", "perlahan"], ["Daging itu masih ____ walaupun direbus.", "liat", "lembut", "empuk", "rapuh"] ]
+                nota: { definisi: "Menerangkan sifat, keadaan, atau perwatakan seseorang, haiwan, tempat, atau benda.", contoh: ["Baik", "Cerdik", "Berani", "Sihat", "Lemah"], ayat: ["Ali disukai ramai kerana dia seorang yang <b>baik</b>.", "Kucing itu sangat <b>cerdik</b> menangkap tikus.", "Pahlawan yang <b>berani</b> itu mara ke hadapan.", "Datuk kelihatan <b>sihat</b> selepas berehat panjang.", "Badannya berasa <b>lemah</b> akibat demam."] },
+                latihan: [ ["Budak yang ____ itu selalu membantu ibunya.", "rajin", "malas", "jahat", "bising"], ["Pemandangan di tepi pantai itu amat ____.", "indah", "busuk", "bising", "hodoh"], ["Harimau ialah seekor haiwan yang amat ____.", "garang", "penakut", "jinak", "lemah"], ["Udara di kawasan pergunungan itu sungguh ____.", "segar", "kotor", "panas", "busuk"], ["Pakaian seragam sekolah mestilah sentiasa ____.", "bersih", "kotor", "busuk", "comot"], ["Pesakit itu masih ____ dan perlukan rehat.", "lemah", "kuat", "sihat", "cergas"], ["Kerja yang susah menjadi ____ jika bekerjasama.", "mudah", "berat", "payah", "sukar"], ["Sungai itu amat ____ kerana dipenuhi sampah.", "kotor", "bersih", "jernih", "suci"], ["Angin bertiup ____ pada petang ini.", "kencang", "lemah", "lembut", "perlahan"], ["Daging lembu itu masih ____ walaupun sudah direbus.", "liat", "lembut", "empuk", "rapuh"] ]
             },
             warna: {
                 nama: "Warna", ikon: "🎨", warna: "from-pink-400 to-rose-600",
-                nota: { definisi: "Menerangkan warna sesuatu objek atau benda.", contoh: ["Merah 🔴", "Biru 🔵", "Kuning 🟡", "Hijau 🟢", "Putih ⚪"], ayat: ["Baju seragam pengawas berwarna <b>biru</b>.", "Bunga mawar <b>merah</b> itu sungguh wangi.", "Daun-daun yang <b>hijau</b> menyegarkan mata.", "Awan <b>putih</b> berarak perlahan di langit.", "Dia memakai kasut sukan berwarna <b>kuning</b>."] },
-                latihan: [ ["Bendera Malaysia ada merah, putih, kuning dan ____.", "biru", "hijau", "hitam", "ungu"], ["Gigi adik sungguh putih seperti ____.", "mutiara", "arang", "kopi", "tanah"], ["Buah mangga masak berwarna ____.", "kuning", "hijau", "putih", "biru"], ["Darah dari lukanya berwarna ____.", "merah", "biru", "putih", "kuning"], ["Rambut nenek bertukar menjadi ____.", "putih", "hitam", "perang", "merah"], ["Warna ____ sering dikaitkan dengan alam.", "hijau", "merah", "hitam", "kuning"], ["Langit malam kelihatan gelap dan ____.", "hitam", "putih", "biru", "merah"], ["Kasut sekolah berwarna ____ atau hitam.", "putih", "merah", "biru", "hijau"], ["Bunga matahari mekar berwarna ____.", "kuning", "biru", "merah", "hitam"], ["Baju pengantin itu berwarna ____ lembut.", "merah jambu", "hitam pekat", "hijau gelap", "kuning diraja"] ]
+                nota: { definisi: "Menerangkan warna sesuatu objek atau benda yang boleh dilihat.", contoh: ["Merah", "Biru", "Kuning", "Hijau", "Putih"], ayat: ["Baju seragam pengawas berwarna <b>biru</b>.", "Bunga mawar <b>merah</b> itu sungguh wangi.", "Daun-daun yang <b>hijau</b> menyegarkan mata.", "Awan <b>putih</b> berarak perlahan di langit.", "Dia memakai kasut sukan berwarna <b>kuning</b>."] },
+                latihan: [ ["Bendera Malaysia mempunyai empat warna iaitu merah, putih, kuning dan ____.", "biru", "hijau", "hitam", "ungu"], ["Gigi adik sungguh putih seperti ____.", "mutiara", "arang", "kopi", "tanah"], ["Buah mangga yang telah masak berwarna ____.", "kuning", "hijau", "putih", "biru"], ["Darah yang mengalir dari lukanya berwarna ____.", "merah", "biru", "putih", "kuning"], ["Rambut nenek telah beruban dan bertukar menjadi ____.", "putih", "hitam", "perang", "merah"], ["Warna ____ sering dikaitkan dengan kedamaian dan alam sekitar.", "hijau", "merah", "hitam", "kuning"], ["Langit pada waktu malam kelihatan gelap dan ____.", "hitam", "putih", "biru", "merah"], ["Kasut sekolah mestilah berwarna ____ atau hitam.", "putih", "merah", "biru", "hijau"], ["Bunga matahari mekar dengan warna ____ yang terang.", "kuning", "biru", "merah", "hitam"], ["Baju pengantin itu berwarna ____ lembut.", "merah jambu", "hitam pekat", "hijau gelap", "kuning diraja"] ]
             },
             ukuran: {
                 nama: "Ukuran", ikon: "📏", warna: "from-amber-400 to-orange-500",
-                nota: { definisi: "Menerangkan ukuran fizikal sesuatu benda.", contoh: ["Panjang 📏", "Pendek 🤏", "Besar 🐘", "Tebal 📚", "Tinggi 🦒"], ayat: ["Sungai Rajang ialah sungai yang <b>panjang</b>.", "Rambut adik dipotong <b>pendek</b> oleh ayah.", "Rumah banglo <b>besar</b> itu milik jutawan.", "Kamus dewan itu sangat <b>tebal</b>.", "Bangunan KLCC amat <b>tinggi</b>."] },
-                latihan: [ ["Tali yang ____ itu digunakan mengikat perahu.", "panjang", "pendek", "bulat", "rendah"], ["Buku cerita yang dibelinya agak ____.", "tebal", "nipis", "tinggi", "panjang"], ["Pokok kelapa di belakang rumah amat ____.", "tinggi", "rendah", "tebal", "nipis"], ["Bilik yang ____ itu memuatkan 100 orang.", "besar", "kecil", "sempit", "pendek"], ["Kain yang ____ itu sesuai dijadikan langsir.", "lebar", "sempit", "pendek", "rendah"], ["Galah yang ____ mengait buah rambutan.", "panjang", "pendek", "tebal", "kecil"], ["Jalan raya yang ____ memudahkan memotong.", "lebar", "sempit", "tinggi", "rendah"], ["Atlet angkat berat berbadan ____.", "besar", "kecil", "nipis", "rendah"], ["Lantai dilapisi karpet yang ____.", "tebal", "nipis", "tinggi", "rendah"], ["Rumput yang ____ sedang dipotong.", "panjang", "pendek", "nipis", "lebar"] ]
+                nota: { definisi: "Menerangkan ukuran fizikal seperti panjang, pendek, saiz, dan berat sesuatu benda.", contoh: ["Panjang", "Pendek", "Besar", "Tebal", "Tinggi"], ayat: ["Sungai Rajang ialah sungai yang paling <b>panjang</b>.", "Rambut adik dipotong <b>pendek</b> oleh ayah.", "Rumah banglo <b>besar</b> itu milik jutawan tersebut.", "Kamus dewan itu sangat <b>tebal</b> dan berat.", "Bangunan KLCC amat <b>tinggi</b> menjulang awan."] },
+                latihan: [ ["Tali yang ____ itu digunakan untuk mengikat perahu.", "panjang", "pendek", "bulat", "rendah"], ["Buku cerita yang dibelinya agak ____.", "tebal", "nipis", "tinggi", "panjang"], ["Pokok kelapa di belakang rumah itu amat ____.", "tinggi", "rendah", "tebal", "nipis"], ["Bilik yang ____ itu dapat memuatkan 100 orang murid.", "besar", "kecil", "sempit", "pendek"], ["Kain yang ____ itu sesuai dijadikan langsir.", "lebar", "sempit", "pendek", "rendah"], ["Galah yang ____ diperlukan untuk mengait buah rambutan.", "panjang", "pendek", "tebal", "kecil"], ["Jalan raya yang ____ memudahkan kenderaan memotong.", "lebar", "sempit", "tinggi", "rendah"], ["Orang yang berbadan ____ itu ialah atlet angkat berat.", "besar", "kecil", "nipis", "rendah"], ["Lantai simen itu dilapisi dengan karpet yang ____.", "tebal", "nipis", "tinggi", "rendah"], ["Rumput yang ____ di padang itu sedang dipotong.", "panjang", "pendek", "nipis", "lebar"] ]
             },
             bentuk: {
                 nama: "Bentuk", ikon: "🔷", warna: "from-emerald-400 to-teal-500",
-                nota: { definisi: "Menerangkan rupa luaran sesuatu benda.", contoh: ["Bulat ⚽", "Segi tiga 🔺", "Bujur 🥚", "Lurus 📏", "Leper 🍽️"], ayat: ["Bola sepak mempunyai bentuk <b>bulat</b>.", "Samosa digoreng dalam bentuk <b>segi tiga</b>.", "Telur ayam itu berbentuk <b>bujur</b>.", "Pembaris panjang itu sungguh <b>lurus</b>.", "Pinggan kaca <b>leper</b> itu dibasuh bersih."] },
-                latihan: [ ["Tayar kereta berbentuk ____ supaya mudah bergolek.", "bulat", "petak", "segi tiga", "bujur"], ["Pemadam ini berbentuk ____ tepat.", "segi empat", "bulat", "bujur", "bengkang-bengkok"], ["Gasing berputar pada paksi berbentuk ____.", "kon", "bulat", "petak", "leper"], ["Bulan purnama kelihatan ____ sepenuhnya.", "bulat", "sabit", "bujur", "leper"], ["Jalan raya ke Cameron Highlands amat ____.", "bengkang-bengkok", "lurus", "leper", "bulat"], ["Bentuk muka bumi di situ agak ____.", "lekuk", "lurus", "bulat", "petak"], ["Pinggan yang ____ itu dihidangkan lauk ikan.", "leper", "bulat", "tinggi", "bujur"], ["Kotak hadiah itu berbentuk ____ sama.", "segi empat", "bulat", "segi tiga", "bujur"], ["Cincin emas berbentuk ____ itu amat mahal.", "bulat", "leper", "petak", "lurus"], ["Rambutnya keriting dan ____ sukar disikat.", "ikal", "lurus", "bulat", "leper"] ]
+                nota: { definisi: "Menerangkan rupa luaran sesuatu benda sama ada bersudut, melengkung atau rata.", contoh: ["Bulat", "Segi tiga", "Bujur", "Lurus", "Leper"], ayat: ["Bola sepak mempunyai bentuk <b>bulat</b>.", "Samosa digoreng dalam bentuk <b>segi tiga</b>.", "Telur ayam itu berbentuk <b>bujur</b>.", "Pembaris panjang itu sungguh <b>lurus</b>.", "Pinggan kaca <b>leper</b> itu dibasuh bersih."] },
+                latihan: [ ["Tayar kereta berbentuk ____ supaya mudah bergolek.", "bulat", "petak", "segi tiga", "bujur"], ["Pemadam ini berbentuk ____ tepat.", "segi empat", "bulat", "bujur", "bengkang-bengkok"], ["Gasing itu berputar di atas paksinya yang berbentuk ____.", "kon", "bulat", "petak", "leper"], ["Bulan purnama malam ini kelihatan ____ sepenuhnya.", "bulat", "sabit", "bujur", "leper"], ["Jalan raya ke Cameron Highlands amat ____.", "bengkang-bengkok", "lurus", "leper", "bulat"], ["Bentuk muka bumi di situ agak ____ dan berbukit.", "lekuk", "lurus", "bulat", "petak"], ["Pinggan yang ____ itu dihidangkan lauk ikan.", "leper", "bulat", "tinggi", "bujur"], ["Kotak hadiah itu berbentuk ____ sama.", "segi empat", "bulat", "segi tiga", "bujur"], ["Cincin emas berbentuk ____ itu amat mahal.", "bulat", "leper", "petak", "lurus"], ["Rambutnya yang keriting dan ____ sukar disikat.", "ikal", "lurus", "bulat", "leper"] ]
             },
             waktu: {
                 nama: "Waktu", ikon: "⏰", warna: "from-violet-400 to-fuchsia-500",
-                nota: { definisi: "Menerangkan konsep masa sesuatu perkara.", contoh: ["Awal 🌅", "Lambat 🐢", "Baru ✨", "Lama 🕰️", "Segera ⚡"], ayat: ["Kami bertolak <b>awal</b> pagi ke kampung.", "Bas sekolah tiba agak <b>lambat</b>.", "Ayah memakai sepasang kasut <b>baru</b>.", "Rumah <b>lama</b> itu telah dirobohkan.", "Bantuan dihantar dengan <b>segera</b>."] },
-                latihan: [ ["Jam tangan yang dipakainya keluaran ____.", "baru", "lama", "awal", "lambat"], ["Sila siapkan tugasan ini dengan ____.", "segera", "lambat", "lama", "lewat"], ["Kami menunggu agak ____ kerana bas rosak.", "lama", "segera", "baru", "awal"], ["Pekerja yang datang ____ akan didenda.", "lewat", "awal", "baru", "segera"], ["Datuk menyimpan barang antik yang ____.", "lama", "baru", "segera", "awal"], ["Dia tiba paling ____ di dewan.", "awal", "lambat", "lama", "baru"], ["Masakan yang sudah ____ jangan dimakan.", "basi", "baru", "segera", "awal"], ["Berita yang ____ diterima mengejutkan.", "baru", "lama", "lewat", "awal"], ["Jangan bersiap terlalu ____, mula pukul 8.", "awal", "lambat", "lewat", "lama"], ["Tindakan yang ____ menyelamatkan mangsa.", "pantas", "lambat", "lama", "lewat"] ]
+                nota: { definisi: "Menerangkan konsep masa atau tempoh berlakunya sesuatu perkara.", contoh: ["Awal", "Lambat", "Baru", "Lama", "Segera"], ayat: ["Kami bertolak <b>awal</b> pagi ke kampung.", "Bas sekolah tiba agak <b>lambat</b> hari ini.", "Ayah memakai sepasang kasut <b>baru</b>.", "Rumah usang yang <b>lama</b> itu telah dirobohkan.", "Bantuan dihantar dengan <b>segera</b> ke sana."] },
+                latihan: [ ["Jam tangan yang dipakainya itu ialah keluaran ____.", "baru", "lama", "awal", "lambat"], ["Sila siapkan tugasan ini dengan ____.", "segera", "lambat", "lama", "lewat"], ["Kami terpaksa menunggu agak ____ kerana bas rosak.", "lama", "segera", "baru", "awal"], ["Pekerja yang datang ____ akan didenda.", "lewat", "awal", "baru", "segera"], ["Datuk menyimpan barangan antik yang ____ di dalam stor.", "lama", "baru", "segera", "awal"], ["Dia tiba paling ____ di dewan peperiksaan.", "awal", "lambat", "lama", "baru"], ["Masakan yang sudah ____ jangan dimakan lagi.", "basi", "baru", "segera", "awal"], ["Berita yang ____ diterima itu amat mengejutkan.", "baru", "lama", "lewat", "awal"], ["Jangan bersiap terlalu ____, majlis mula pukul 8.", "awal", "lambat", "lewat", "lama"], ["Tindakan yang ____ menyelamatkan nyawa mangsa.", "pantas", "lambat", "lama", "lewat"] ]
             },
             jarak: {
                 nama: "Jarak", ikon: "📐", warna: "from-cyan-400 to-blue-500",
-                nota: { definisi: "Menerangkan ruang atau perbezaan kedudukan.", contoh: ["Jauh 🔭", "Dekat 📍", "Hampir ⏳", "Nyaris 😱", "Rapat 🫂"], ayat: ["Rumah nenek sangat <b>jauh</b> dari bandar.", "Sekolah saya terletak <b>dekat</b> dengan surau.", "Kami berjalan <b>hampir</b> ke puncak.", "Kereta itu <b>nyaris</b> melanggar pokok.", "Mereka duduk <b>rapat</b> dalam dewan."] },
-                latihan: [ ["Rumah Ali terletak sungguh ____ dengan sekolahnya.", "dekat", "jauh", "nyaris", "hampir"], ["Perjalanan ke Eropah mengambil masa kerana ____.", "jauh", "dekat", "rapat", "hampir"], ["Motisikal itu ____ melanggar seekor kucing.", "nyaris", "jauh", "dekat", "rapat"], ["Mereka berdiri amat ____ antara satu sama lain.", "rapat", "jauh", "dekat", "nyaris"], ["Waktu berbuka puasa sudah ____ tiba.", "hampir", "jauh", "rapat", "nyaris"], ["Bunyi tembakan kedengaran dari jarak ____.", "jauh", "dekat", "rapat", "nyaris"], ["Tali mengikat perahu terikat terlalu ____.", "rapat", "jauh", "dekat", "nyaris"], ["Hubungan mereka sekeluarga sungguh ____.", "rapat", "jauh", "dekat", "nyaris"], ["Jarak bintang dengan bumi amatlah ____.", "jauh", "dekat", "rapat", "hampir"], ["Bola itu jatuh ____ dengan garisan gol.", "hampir", "jauh", "rapat", "nyaris"] ]
+                nota: { definisi: "Menerangkan ruang atau perbezaan kedudukan di antara dua benda atau tempat.", contoh: ["Jauh", "Dekat", "Hampir", "Nyaris", "Rapat"], ayat: ["Rumah nenek sangat <b>jauh</b> dari bandar.", "Sekolah saya terletak <b>dekat</b> dengan surau.", "Kami berjalan sehingga <b>hampir</b> ke puncak.", "Kereta itu <b>nyaris</b> melanggar sebatang pokok.", "Mereka duduk amat <b>rapat</b> dalam dewan."] },
+                latihan: [ ["Rumah Ali terletak sungguh ____ dengan sekolahnya.", "dekat", "jauh", "nyaris", "hampir"], ["Perjalanan ke Eropah mengambil masa kerana jaraknya yang ____.", "jauh", "dekat", "rapat", "hampir"], ["Motisikal itu ____ melanggar seekor kucing.", "nyaris", "jauh", "dekat", "rapat"], ["Mereka berdiri amat ____ antara satu sama lain.", "rapat", "jauh", "dekat", "nyaris"], ["Waktu berbuka puasa sudah ____ tiba.", "hampir", "jauh", "rapat", "nyaris"], ["Bunyi tembakan itu kedengaran dari jarak yang ____.", "jauh", "dekat", "rapat", "nyaris"], ["Tali yang mengikat perahu itu terikat terlalu ____.", "rapat", "jauh", "dekat", "nyaris"], ["Hubungan mereka sekeluarga sungguh ____.", "rapat", "jauh", "dekat", "nyaris"], ["Jarak antara bintang dengan bumi amatlah ____.", "jauh", "dekat", "rapat", "hampir"], ["Bola itu jatuh ____ dengan garisan gol.", "hampir", "jauh", "rapat", "nyaris"] ]
             },
             cara: {
                 nama: "Cara", ikon: "🚀", warna: "from-rose-400 to-red-500",
-                nota: { definisi: "Menerangkan keadaan kelakuan atau pergerakan.", contoh: ["Pantas 🏎️", "Lambat 🐌", "Perlahan 🚶", "Gopoh 🏃‍♂️", "Laju 💨"], ayat: ["Pelari pecut itu berlari amat <b>pantas</b>.", "Kura-kura berjalan sungguh <b>lambat</b>.", "Dia bercakap dengan suara yang <b>perlahan</b>.", "Jangan makan terlalu <b>gopoh</b>.", "Kereta api peluru bergerak sungguh <b>laju</b>."] },
-                latihan: [ ["Harimau bintang berlari dengan amat ____.", "pantas", "perlahan", "lambat", "gopoh"], ["Siput babi bergerak sungguh ____.", "lambat", "laju", "pantas", "deras"], ["Air sungai mengalir ____ selepas hujan.", "deras", "perlahan", "pantas", "lambat"], ["Kerana terlalu ____, dia tertinggal fail.", "gopoh", "perlahan", "lambat", "laju"], ["Berbicaralah dengan suara yang ____.", "lembut", "deras", "gopoh", "laju"], ["Tindakan anggota bomba itu sungguh ____.", "cekap", "perlahan", "gopoh", "lambat"], ["Kereta sport memecut dengan amat ____.", "laju", "lambat", "perlahan", "deras"], ["Dia berjalan ____ kerana kaki terseliuh.", "perlahan", "laju", "pantas", "deras"], ["Tumbukan peninju sungguh ____ dan tepat.", "kuat", "perlahan", "lembut", "lambat"], ["Pesawat mendarat dengan ____.", "lancar", "gopoh", "deras", "lambat"] ]
+                nota: { definisi: "Menerangkan keadaan, kelakuan atau pergerakan sesuatu perbuatan.", contoh: ["Pantas", "Lambat", "Perlahan", "Gopoh", "Laju"], ayat: ["Pelari pecut itu berlari dengan amat <b>pantas</b>.", "Kura-kura berjalan sungguh <b>lambat</b>.", "Dia bercakap dengan suara yang <b>perlahan</b>.", "Jangan makan terlalu <b>gopoh</b> nanti tersedak.", "Kereta api peluru bergerak sungguh <b>laju</b>."] },
+                latihan: [ ["Harimau bintang berlari dengan amat ____.", "pantas", "perlahan", "lambat", "gopoh"], ["Siput babi bergerak sungguh ____ di atas daun.", "lambat", "laju", "pantas", "deras"], ["Air sungai itu mengalir dengan ____ selepas hujan lebat.", "deras", "perlahan", "pantas", "lambat"], ["Kerana terlalu ____, dia tertinggal fail penting.", "gopoh", "perlahan", "lambat", "laju"], ["Berbicaralah dengan suara yang ____ dan sopan.", "lembut", "deras", "gopoh", "laju"], ["Tindakan anggota bomba itu sungguh ____.", "cekap", "perlahan", "gopoh", "lambat"], ["Kereta sport itu memecut dengan amat ____.", "laju", "lambat", "perlahan", "deras"], ["Dia berjalan ____ kerana kakinya terseliuh.", "perlahan", "laju", "pantas", "deras"], ["Tumbukan peninju itu sungguh ____ dan tepat.", "kuat", "perlahan", "lembut", "lambat"], ["Pesawat itu mendarat dengan ____ dan selamat.", "lancar", "gopoh", "deras", "lambat"] ]
             },
             perasaan: {
                 nama: "Perasaan", ikon: "😍", warna: "from-pink-400 to-purple-500",
-                nota: { definisi: "Menerangkan emosi atau keadaan jiwa.", contoh: ["Gembira 😄", "Sedih 😢", "Marah 😡", "Sayang ❤️", "Takut 😨"], ayat: ["Ibu amat <b>gembira</b> melihat kejayaan saya.", "Hatinya <b>sedih</b> kerana kucing hilang.", "Cikgu <b>marah</b> mereka bising.", "Ibu bapa amat <b>sayang</b> anak mereka.", "Adik <b>takut</b> melihat anjing garang."] },
-                latihan: [ ["Kami berasa sungguh ____ memenangi perlawanan.", "gembira", "sedih", "marah", "takut"], ["Dia berasa ____ gagal ujian memandu.", "kecewa", "gembira", "marah", "bangga"], ["Bapa ____ kerana cermin kereta pecah.", "marah", "sayang", "sedih", "gembira"], ["Ibu amat ____ akan anak bongsunya.", "sayang", "benci", "marah", "takut"], ["Penduduk kampung ____ melihat ular sawa.", "terkejut", "gembira", "sayang", "rindu"], ["Perantau itu berasa ____ kampung halamannya.", "rindu", "benci", "marah", "takut"], ["Pemain berasa ____ mewakili negara.", "bangga", "sedih", "kecewa", "takut"], ["Jangan mudah ____ menerima kritikan.", "tersinggung", "gembira", "bangga", "sayang"], ["Dia ____ berucap di hadapan orang ramai.", "malu", "berani", "marah", "gembira"], ["Hatiku ____ melihat mangsa peperangan.", "pilu", "gembira", "bangga", "marah"] ]
+                nota: { definisi: "Menerangkan konsep emosi, perasaan atau keadaan jiwa yang dialami.", contoh: ["Gembira", "Sedih", "Marah", "Sayang", "Takut"], ayat: ["Ibu amat <b>gembira</b> melihat kejayaan saya.", "Hatinya <b>sedih</b> kerana kucingnya hilang.", "Cikgu <b>marah</b> kerana mereka bising di kelas.", "Ibu bapa amat <b>sayang</b> akan anak mereka.", "Adik berasa <b>takut</b> melihat anjing garang itu."] },
+                latihan: [ ["Kami berasa sungguh ____ apabila memenangi perlawanan itu.", "gembira", "sedih", "marah", "takut"], ["Dia berasa ____ kerana gagal dalam ujian memandu.", "kecewa", "gembira", "marah", "bangga"], ["Bapa ____ kerana cermin keretanya pecah.", "marah", "sayang", "sedih", "gembira"], ["Ibu amat ____ akan anak bongsunya.", "sayang", "benci", "marah", "takut"], ["Penduduk kampung ____ melihat ular sawa gergasi itu.", "terkejut", "gembira", "sayang", "rindu"], ["Perantau itu berasa ____ akan kampung halamannya.", "rindu", "benci", "marah", "takut"], ["Pemain itu berasa ____ mewakili negara ke sukan Olimpik.", "bangga", "sedih", "kecewa", "takut"], ["Jangan mudah ____ apabila menerima kritikan.", "tersinggung", "gembira", "bangga", "sayang"], ["Dia ____ untuk berucap di hadapan orang ramai.", "malu", "berani", "marah", "gembira"], ["Hatiku ____ melihat penderitaan mangsa peperangan.", "pilu", "gembira", "bangga", "marah"] ]
             },
             pancaindera: {
                 nama: "Pancaindera", ikon: "👅", warna: "from-amber-500 to-red-500",
-                nota: { definisi: "Menerangkan sifat dikesan oleh 5 deria manusia.", contoh: ["Rasa: Manis 🍯", "Dengar: Bising 🔊", "Sentuh: Kasar 🪨", "Lihat: Cantik 🌸", "Bau: Busuk 🦨"], ayat: ["Buah mangga ini rasanya sungguh <b>manis</b>.", "Keadaan di pasar itu amat <b>bising</b>.", "Permukaan jalan tar itu sungguh <b>kasar</b>.", "Pemandangan di pantai itu amat <b>cantik</b>.", "Sampah di tong itu berbau <b>busuk</b>."] },
-                latihan: [ ["Sup ayam terasa agak ____ kerana kurang garam.", "tawar", "manis", "masin", "pedas"], ["Gadis berbaju kurung itu kelihatan amat ____.", "cantik", "hodoh", "bising", "busuk"], ["Bunyi mercun sungguh ____ memekakkan telinga.", "bising", "senyap", "sunyi", "wangi"], ["Permukaan cermin amat ____ dan berkilat.", "licin", "kasar", "menggerutu", "kesat"], ["Bunga mawar mengeluarkan bau yang ____.", "wangi", "busuk", "hancing", "tengik"], ["Kopi O rasanya amat ____ tanpa gula.", "pahit", "manis", "masam", "masin"], ["Kain sutera terasa amat ____ disentuh.", "lembut", "kasar", "keras", "kesat"], ["Limau purut mempunyai kulit yang ____.", "menggerutu", "licin", "lembut", "halus"], ["Sambal nasi lemak itu terlalu ____.", "pedas", "manis", "masin", "tawar"], ["Suara penyanyi sungguh ____ didengar.", "merdu", "sumbang", "garau", "bising"] ]
+                nota: { definisi: "Menerangkan sifat yang dikesan oleh deria (Rasa, Dengar, Sentuh, Lihat, Bau).", contoh: ["Manis (Rasa)", "Bising (Dengar)", "Kasar (Sentuh)", "Cantik (Lihat)", "Busuk (Bau)"], ayat: ["Buah mangga ini rasanya sungguh <b>manis</b>.", "Keadaan di pasar itu amat <b>bising</b>.", "Permukaan jalan tar itu sungguh <b>kasar</b>.", "Pemandangan di tepi pantai itu amat <b>cantik</b>.", "Sampah di dalam tong itu berbau <b>busuk</b>."] },
+                latihan: [ ["Sup ayam itu terasa agak ____ kerana kurang garam.", "tawar", "manis", "masin", "pedas"], ["Gadis yang memakai baju kurung itu kelihatan amat ____.", "cantik", "hodoh", "bising", "busuk"], ["Bunyi mercun itu sungguh ____ sehingga memekakkan telinga.", "bising", "senyap", "sunyi", "wangi"], ["Permukaan cermin itu amat ____ dan berkilat.", "licin", "kasar", "menggerutu", "kesat"], ["Bunga mawar itu mengeluarkan bau yang ____.", "wangi", "busuk", "hancing", "tengik"], ["Kopi O itu rasanya amat ____ tanpa gula.", "pahit", "manis", "masam", "masin"], ["Kain sutera itu terasa amat ____ apabila disentuh.", "lembut", "kasar", "keras", "kesat"], ["Limau purut itu mempunyai kulit yang ____.", "menggerutu", "licin", "lembut", "halus"], ["Sambal nasi lemak itu terlalu ____.", "pedas", "manis", "masin", "tawar"], ["Suara penyanyi itu sungguh ____ didengar.", "merdu", "sumbang", "garau", "bising"] ]
             }
         };
 
-        const DATA_GAME_MARIO = [ ["Budak yang ____ itu rajin membaca.", "baik", "malas", "jahat", "marah"], ["Baju bapa berwarna ____ terang.", "biru", "bising", "panjang", "sedih"], ["Tiang bendera itu sangat ____.", "tinggi", "rendah", "pendek", "nipis"], ["Guli itu berbentuk ____.", "bulat", "petak", "leper", "bujur"], ["Tidur ____ mendatangkan penyakit.", "lewat", "awal", "pantas", "baru"], ["Perjalanan ke kampung amat ____.", "jauh", "dekat", "rapat", "hampir"], ["Harimau berlari dengan ____.", "pantas", "lambat", "lemah", "gopoh"], ["Saya berasa ____ hari ini.", "gembira", "sedih", "marah", "takut"], ["Aiskrim rasanya sangat ____.", "manis", "pahit", "masin", "tawar"], ["Bunga matahari mekar berwarna ____.", "kuning", "biru", "putih", "hitam"] ];
-        const DATA_GAME_CIRCUS = [ ["Suara penyanyi sarkas itu ____.", "merdu", "sumbang", "bising", "kasar"], ["Gajah sarkas bersaiz amat ____.", "besar", "kecil", "nipis", "pendek"], ["Singa itu kelihatan ____.", "garang", "penakut", "baik", "sedih"], ["Tali pemanjat itu sangat ____.", "panjang", "pendek", "rendah", "nipis"], ["Pertunjukan bermula ____ malam.", "awal", "lewat", "lama", "baru"], ["Gelung api berbentuk ____.", "bulat", "petak", "segi tiga", "lurus"], ["Kuda melompat dengan ____.", "pantas", "lambat", "berat", "lemah"], ["Penonton berasa ____.", "terkejut", "sedih", "marah", "rindu"], ["Jarak penonton agak ____.", "dekat", "jauh", "rapat", "hampir"], ["Langsir pentas berwarna ____.", "merah", "putih", "hitam", "kelabu"] ];
-        const DATA_BINA_AYAT = [ ["Bulan", "purnama", "bersinar", "sungguh", "terang"], ["Murid", "yang", "rajin", "itu", "dipuji"], ["Kereta", "baharu", "ayah", "berwarna", "biru"], ["Rumah", "banglo", "itu", "amat", "besar"], ["Sungai", "yang", "jernih", "itu", "cantik"], ["Larian", "kuda", "itu", "sungguh", "pantas"], ["Ibu", "berasa", "gembira", "hari", "ini"], ["Masakan", "nenek", "itu", "terasa", "sedap"], ["Bangunan", "pencakar", "langit", "amat", "tinggi"], ["Perjalanan", "ke", "bandar", "agak", "jauh"] ];
+        const DATA_GAME_MARIO = [
+            ["Budak yang ____ itu rajin membaca.", "baik", "malas", "jahat", "marah"], ["Baju bapa berwarna ____ terang.", "biru", "bising", "panjang", "sedih"], ["Tiang bendera itu sangat ____.", "tinggi", "rendah", "pendek", "nipis"], ["Guli itu berbentuk ____.", "bulat", "petak", "leper", "bujur"], ["Tidur ____ mendatangkan penyakit.", "lewat", "awal", "pantas", "baru"], ["Perjalanan ke kampung amat ____.", "jauh", "dekat", "rapat", "hampir"], ["Harimau berlari dengan ____.", "pantas", "lambat", "lemah", "gopoh"], ["Saya berasa ____ hari ini.", "gembira", "sedih", "marah", "takut"], ["Aiskrim rasanya sangat ____.", "manis", "pahit", "masin", "tawar"], ["Bunga matahari mekar berwarna ____.", "kuning", "biru", "putih", "hitam"]
+        ];
+
+        const DATA_GAME_CIRCUS = [
+            ["Suara penyanyi sarkas itu ____.", "merdu", "sumbang", "bising", "kasar"], ["Gajah sarkas bersaiz amat ____.", "besar", "kecil", "nipis", "pendek"], ["Singa itu kelihatan ____.", "garang", "penakut", "baik", "sedih"], ["Tali pemanjat itu sangat ____.", "panjang", "pendek", "rendah", "nipis"], ["Pertunjukan bermula ____ malam.", "awal", "lewat", "lama", "baru"], ["Gelung api berbentuk ____.", "bulat", "petak", "segi tiga", "lurus"], ["Kuda melompat dengan ____.", "pantas", "lambat", "berat", "lemah"], ["Penonton berasa ____.", "terkejut", "sedih", "marah", "rindu"], ["Jarak penonton agak ____.", "dekat", "jauh", "rapat", "hampir"], ["Langsir pentas berwarna ____.", "merah", "putih", "hitam", "kelabu"]
+        ];
+
+        const DATA_BINA_AYAT = [
+            ["Bulan", "purnama", "bersinar", "sungguh", "terang"], ["Murid", "yang", "rajin", "itu", "dipuji"], ["Kereta", "baharu", "ayah", "berwarna", "biru"], ["Rumah", "banglo", "itu", "amat", "besar"], ["Sungai", "yang", "jernih", "itu", "cantik"], ["Larian", "kuda", "itu", "sungguh", "pantas"], ["Ibu", "berasa", "gembira", "hari", "ini"], ["Masakan", "nenek", "itu", "terasa", "sedap"], ["Bangunan", "pencakar", "langit", "amat", "tinggi"], ["Perjalanan", "ke", "bandar", "agak", "jauh"]
+        ];
 
         let audioCtx;
         function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
@@ -139,16 +148,33 @@
             user: null, view: 'login', bintang: 0, anugerah: 'Penyertaan',
             showPopup: false, popupMsg: '', popupType: '',
             adminData: [], adminLoading: false,
-            editModal: { show: false, topik: '', index: 0, text: '' }, // Modal Khas Edit Soalan
             notaKey: null, notaTab: 1,
             latihanKey: null, latihanIndex: 0, latihanMarkah: 0, latihanTamat: false, latihanSoalan: [],
             gamePilih: null, gameIndex: 0, gameScore: 0, gameLives: 3, gameTamat: false, 
-            gamePhase: 'tunggu_lompat', gameAnim: '', gameTimeout: null,
-            susunAyat: [], susunJawab: []
+            gamePhase: 'lari', soalanRawak: [],
+            susunAyat: [], susunJawab: [],
+            exitConfirm: { show: false, context: null }, // MODAL PENGESAHAN KELUAR
+            gameMasaKini: 0, gameTimerInterval: null, // PEMASA
+            gameEngineState: {
+                keys: { left: false, right: false, up: false },
+                player: { x: 100, y: 0, vx: 0, vy: 0, isJumping: false },
+                cameraX: 0,
+                obstacles: [],
+                animId: null
+            }
         };
 
         function calculateAnugerah(bintang) {
-            if (bintang >= 30) return "Emas"; if (bintang >= 20) return "Perak"; if (bintang >= 10) return "Gangsa"; return "Penyertaan";
+            if (bintang >= 30) return "Emas";
+            if (bintang >= 20) return "Perak";
+            if (bintang >= 10) return "Gangsa";
+            return "Penyertaan";
+        }
+
+        window.formatMasa = function(saat) {
+            const m = Math.floor(saat / 60).toString().padStart(2, '0');
+            const s = (saat % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
         }
 
         function simpanDataUser() {
@@ -164,270 +190,141 @@
         
         function tambahBintang(jumlah) { state.bintang += jumlah; simpanDataUser(); renderApp(); }
 
-        function cetusPopup(betul, msg = null) {
-            state.showPopup = true; state.popupType = betul ? 'betul' : 'salah'; state.popupMsg = msg ? msg : (betul ? 'Tahniah! Anda Hebat! 🎉' : 'Opps! Cuba Lagi 💥');
-            renderApp(); setTimeout(() => { state.showPopup = false; renderApp(); }, 1200);
+        function cetusPopup(betul) {
+            state.showPopup = true; state.popupType = betul ? 'betul' : 'salah'; state.popupMsg = betul ? 'Tahniah! Anda Hebat! 🎉' : 'Opps! Cuba Lagi 💥';
+            renderApp();
+            setTimeout(() => { state.showPopup = false; renderApp(); }, 1200);
         }
 
         window.setView = function(v) { playSound('click'); state.view = v; if(v === 'admin' || v === 'rekod') fetchAdmin(); renderApp(); }
         window.logout = function() { playSound('error'); state.user = null; state.bintang = 0; state.view = 'login'; renderApp(); }
 
-        function fetchAdmin() {
-            state.adminLoading = true; renderApp();
-            fetch(SCRIPT_URL + "?t=" + new Date().getTime()).then(r=>r.json()).then(d => { 
-                state.adminData = d; 
-                // Selaraskan soalan terkini ke dalam UI terus
-                if(d.soalan_edit) {
-                    d.soalan_edit.forEach(s => {
-                        if(KATEGORI[s.topik] && KATEGORI[s.topik].latihan[s.index]) {
-                            KATEGORI[s.topik].latihan[s.index][0] = s.soalanText;
-                        }
-                    });
-                }
-                state.adminLoading = false; renderApp(); 
-            }).catch(e => { state.adminLoading = false; renderApp(); });
+        // ==========================================
+        // FUNGSI PENGESAHAN KELUAR & SIMPAN MARKAH SEMASA
+        // ==========================================
+        window.mintaKeluar = function(context) { 
+            playSound('pop'); 
+            state.exitConfirm = { show: true, context: context }; 
+            renderApp(); 
         }
-
-        window.bukaEditModal = function(topik, idx) {
+        window.batalKeluar = function() { 
+            playSound('click'); 
+            state.exitConfirm.show = false; 
+            renderApp(); 
+        }
+        window.sahKeluar = function() {
             playSound('click');
-            state.editModal = { show: true, topik: topik, index: idx, text: KATEGORI[topik].latihan[idx][0] };
-            renderApp();
-        }
+            state.exitConfirm.show = false;
+            let markahTerkumpul = 0;
 
-        window.tutupEditModal = function() {
-            playSound('click');
-            state.editModal.show = false;
-            renderApp();
-        }
-
-        window.simpanEditModal = function() {
-            const textBaru = document.getElementById('editSoalanText').value;
-            if(textBaru && textBaru !== state.editModal.text) {
-                // Update memori sistem serta merta
-                KATEGORI[state.editModal.topik].latihan[state.editModal.index][0] = textBaru;
+            if (state.exitConfirm.context === 'game') {
+                if(state.gameTimerInterval) clearInterval(state.gameTimerInterval);
+                if(state.gameEngineState && state.gameEngineState.animId) cancelAnimationFrame(state.gameEngineState.animId);
                 
-                // Tolak ke Google Sheet dengan no-cors supaya tidak disekat browser
-                fetch(SCRIPT_URL, { 
-                    method: 'POST', 
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
-                    body: JSON.stringify({ action: 'edit_soalan', topik: state.editModal.topik, index: state.editModal.index, soalanText: textBaru }) 
-                });
+                // SIMPAN MARKAH SEMASA KELUAR
+                if(state.gamePilih === 'susun') markahTerkumpul = state.gameScore * 3;
+                else if(state.gamePilih === 'mario' || state.gamePilih === 'circus') markahTerkumpul = state.gameScore * 2;
                 
-                playSound('success');
-                alert("Berjaya disimpan! Soalan akan ditukar.");
-            }
-            state.editModal.show = false;
-            renderApp();
-        }
+                state.gamePilih = null;
+                state.gameTamat = false;
+                state.view = 'dashboard';
 
-        function renderAdmin() {
-            if(state.adminLoading) return `<div class="text-center py-20 text-3xl font-bold text-white">Memuatkan Pangkalan Data... 🚀</div>`;
-            const rekod = state.adminData.rekod || JSON.parse(localStorage.getItem('bka_rekod') || '[]'); 
-            
-            let htmlSoalanList = '';
-            for(let key in KATEGORI) {
-                htmlSoalanList += `<div class="mt-4"><h3 class="font-bold text-xl text-emerald-400 border-b border-emerald-400 mb-2">${KATEGORI[key].nama}</h3>`;
-                KATEGORI[key].latihan.forEach((q, idx) => {
-                    htmlSoalanList += `<div class="bg-slate-700 p-3 rounded-xl mb-2 flex justify-between items-center text-sm"><div class="font-bold text-white w-3/4">${idx+1}. ${q[0]}</div><button onclick="bukaEditModal('${key}', ${idx})" class="bg-blue-500 px-4 py-2 rounded-lg font-bold text-white btn-3d text-xs">Edit</button></div>`;
-                });
-                htmlSoalanList += `</div>`;
+            } else if (state.exitConfirm.context === 'latihan') {
+                markahTerkumpul = state.latihanMarkah * 2;
+                state.latihanKey = null;
+                state.latihanTamat = false;
+                state.view = 'dashboard';
             }
 
-            return `<div class="pop-in grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-white rounded-[2rem] p-8 shadow-xl border-4 border-slate-100 card-wow text-center"><h2 class="text-2xl font-bold text-slate-800 mb-6 border-b-2 pb-4">📊 Jumlah Peserta</h2><div class="text-8xl font-bold text-indigo-600 mb-2">${rekod.length}</div></div><div class="bg-white rounded-[2rem] p-8 shadow-xl border-4 border-slate-100 card-wow"><h2 class="text-2xl font-bold text-slate-800 mb-6 border-b-2 pb-4">🏆 Kedudukan Terkini</h2><div class="max-h-48 overflow-y-auto">${rekod.slice(0,5).map((r,i) => `<div class="flex justify-between items-center bg-slate-50 p-3 mb-2 rounded-xl border border-slate-200"><b>#${i+1} ${r.nama}</b><span class="text-amber-500 font-bold">${r.anugerah}</span></div>`).join('')}</div></div><div class="md:col-span-2 bg-slate-800 text-white rounded-[2rem] p-8 shadow-xl border-4 border-slate-700 card-wow"><h2 class="text-2xl font-bold text-amber-400 mb-6">⚙️ Senarai 90 Soalan (Edit Secara Langsung)</h2><div class="max-h-96 overflow-y-auto pr-4">${htmlSoalanList}</div></div></div>`;
+            if (markahTerkumpul > 0) {
+                tambahBintang(markahTerkumpul);
+                alert(`Sesi ditamatkan awal. Anda telah berjaya mengumpul dan menyimpan ${markahTerkumpul} Bintang setakat ini! ⭐`);
+            }
+
+            renderApp();
         }
 
-        function renderEditModal() {
-            if(!state.editModal.show) return '';
+        function renderExitConfirm() {
+            if(!state.exitConfirm.show) return '';
             return `
-            <div class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4">
-                <div class="bg-white p-8 rounded-3xl w-full max-w-lg pop-in border-8 border-blue-400">
-                    <h3 class="text-2xl font-bold mb-4 text-slate-800">Edit Soalan</h3>
-                    <p class="text-slate-500 mb-2 font-bold bg-slate-100 px-4 py-2 rounded-lg">Topik: ${KATEGORI[state.editModal.topik].nama}</p>
-                    <textarea id="editSoalanText" class="w-full border-4 border-slate-200 rounded-xl p-4 text-lg font-bold mb-6 h-32 focus:border-blue-400 outline-none mt-4">${state.editModal.text}</textarea>
-                    <div class="flex gap-4 justify-end">
-                        <button onclick="tutupEditModal()" class="px-6 py-3 bg-slate-200 font-bold rounded-xl btn-3d text-slate-600 hover:bg-slate-300">Batal</button>
-                        <button onclick="simpanEditModal()" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl btn-3d hover:bg-blue-700">Simpan Ke Database</button>
+            <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                <div class="bg-white p-10 rounded-[2rem] text-center max-w-lg mx-4 pop-in border-8 border-rose-500 shadow-2xl">
+                    <div class="text-7xl mb-4">⚠️</div>
+                    <h2 class="text-3xl font-bold text-slate-800 mb-6 leading-relaxed">Adakah anda pasti ingin keluar daripada permainan?</h2>
+                    <div class="flex justify-center gap-4">
+                        <button onclick="batalKeluar()" class="px-8 py-3 bg-slate-200 text-slate-700 font-bold text-xl rounded-xl btn-3d">Tidak</button>
+                        <button onclick="sahKeluar()" class="px-8 py-3 bg-rose-500 text-white font-bold text-xl rounded-xl btn-3d border-4 border-rose-300">Ya, Keluar</button>
                     </div>
                 </div>
             </div>`;
         }
 
-        window.bukaGame = function(g) {
-            playSound('pop'); state.gamePilih = g; 
-            state.gameIndex = 0; state.gameScore = 0; state.gameLives = 3; state.gameTamat = false; 
-            
-            if(g === 'susun') {
-                state.susunAyat = [...DATA_BINA_AYAT[0]].sort(()=>Math.random()-0.5); state.susunJawab = [];
-            } else if (g === 'mario' || g === 'circus') {
-                // RAWAKKAN KESEMUA 10 SOALAN SETIAP KALI MAIN
-                state.soalanArkedRawak = g === 'mario' ? [...DATA_GAME_MARIO].sort(()=>Math.random()-0.5) : [...DATA_GAME_CIRCUS].sort(()=>Math.random()-0.5);
-                mulaLarianArked();
-            }
-            renderApp();
-        }
-        
-        window.tutupGame = function() { 
-            playSound('click'); 
-            if(state.gameTimeout) clearTimeout(state.gameTimeout); 
-            state.gamePilih = null; 
-            state.gameTamat = false; 
-            renderApp(); 
-        }
-
-        window.mulaLarianArked = function() {
-            state.gamePhase = 'lari';
-            state.gameAnim = '';
-            renderApp();
-            
-            if(state.gameTimeout) clearTimeout(state.gameTimeout);
-            
-            // Lari bebas selama 2 saat sebelum kotak soalan / checkpoint muncul
-            state.gameTimeout = setTimeout(() => {
-                if (state.view === 'permainan' && (state.gamePilih === 'mario' || state.gamePilih === 'circus') && state.gamePhase === 'lari') {
-                    state.gamePhase = 'kotak_datang';
-                    renderApp();
-
-                    // Kotak bergerak ke arah pemain (1.5 saat) kemudian PAUSE
-                    state.gameTimeout = setTimeout(() => {
-                        if (state.view === 'permainan' && state.gamePhase === 'kotak_datang') {
-                            playSound('pop');
-                            state.gamePhase = 'soalan'; // GAME DIJEDA (PAUSE)
-                            renderApp();
-                        }
-                    }, 1500);
-                }
-            }, 2000); 
-        }
-
-        window.lompatBebas = function() {
-            // Pemain boleh tekan lompat bila-bila masa semasa berlari untuk elak halangan hiasan
-            if(state.gamePhase === 'lari' || state.gamePhase === 'kotak_datang') {
-                playSound('pop');
-                state.gameAnim = 'lompat';
-                renderApp();
-                setTimeout(() => {
-                    if(state.gameAnim === 'lompat') { state.gameAnim = ''; renderApp(); }
-                }, 600);
-            }
-        }
-
-        window.jawabGameArked = function(jawapan) {
-            const qs = state.soalanArkedRawak[state.gameIndex];
-            const betul = jawapan === qs[1];
-
-            if(betul) {
-                playSound('success'); state.gameScore++;
-                state.gamePhase = 'jawab_betul'; state.gameAnim = 'lompat';
-                cetusPopup(true, "Tepat! (+1 Markah) 🎉");
-            } else {
-                playSound('error'); state.gameLives--;
-                state.gamePhase = 'jawab_salah';
-                cetusPopup(false, "Opps! Tersadung 💥");
-            }
-            renderApp();
-
-            setTimeout(() => {
-                state.gameAnim = '';
-                if(state.gameLives <= 0) { state.gameTamat = true; tambahBintang(state.gameScore * 2); renderApp(); } 
-                else if(state.gameIndex + 1 < 10) { state.gameIndex++; mulaLarianArked(); } 
-                else { state.gameTamat = true; tambahBintang(state.gameScore * 2); renderApp(); }
-            }, 1500);
-        }
-
-        window.klikSusun = function(perkataan, i) { playSound('click'); state.susunJawab.push(perkataan); state.susunAyat[i] = null; renderApp(); }
-        window.semakSusun = function() {
-            const asal = DATA_BINA_AYAT[state.gameIndex].join(' '); const jawab = state.susunJawab.join(' '); const betul = asal === jawab; cetusPopup(betul);
-            setTimeout(() => {
-                if(betul) { state.gameScore++; if(state.gameIndex + 1 < 10) { state.gameIndex++; state.susunAyat = [...DATA_BINA_AYAT[state.gameIndex]].sort(()=>Math.random()-0.5); state.susunJawab = []; } else { state.gameTamat = true; tambahBintang(state.gameScore * 3); } } 
-                else { state.gameLives--; if(state.gameLives <= 0) { state.gameTamat = true; tambahBintang(state.gameScore * 3); } else { state.susunAyat = state.susunJawab.filter(x=>x).concat(state.susunAyat.filter(x=>x)).sort(()=>Math.random()-0.5); state.susunJawab = []; } }
-                renderApp();
-            }, 1200);
-        }
-
-        function renderPermainan() {
-            if(state.gameTamat) return `<div class="bg-white p-12 text-center max-w-2xl mx-auto rounded-[3rem] border-8 border-blue-400 pop-in mt-10 card-wow"><div class="text-8xl mb-6">🏁</div><h2 class="text-5xl font-bold mb-4 text-slate-800">Permainan Tamat!</h2><p class="text-3xl font-bold text-slate-500 mb-6">Markah: ${state.gameScore}/10</p><p class="text-2xl font-bold text-blue-500 mb-10">Bintang diperoleh: +${state.gamePilih==='susun'? state.gameScore*3 : state.gameScore*2} ⭐</p><button onclick="tutupGame()" class="bg-blue-500 text-white px-10 py-5 font-bold text-2xl rounded-full btn-3d">Kembali Keluar</button></div>`;
-
-            if(state.gamePilih === 'susun') {
-                let kotak = state.susunJawab.map(s => `<div class="bg-white px-6 py-4 rounded-2xl text-3xl font-bold text-emerald-700 card-wow border-4 border-emerald-200 pop-in">${s}</div>`).join('');
-                let butang = state.susunAyat.map((p,i) => p ? `<button onclick="klikSusun('${p}', ${i})" class="bg-amber-400 text-amber-900 px-8 py-4 text-3xl font-bold rounded-2xl btn-3d border-4 border-white mx-2">${p}</button>` : `<div class="w-32 mx-2"></div>`).join('');
-                return `<div class="bg-gradient-to-b from-emerald-400 to-teal-500 p-10 rounded-[3rem] min-h-[70vh] flex flex-col items-center justify-center pop-in card-wow border-8 border-white relative mt-4"><button onclick="tutupGame()" class="absolute top-6 left-6 text-white bg-black/20 w-12 h-12 rounded-full font-bold btn-3d text-xl">X</button><div class="absolute top-6 right-6 text-white font-bold text-2xl bg-black/20 px-6 py-2 rounded-full">❤️ ${state.gameLives} | Soalan ${state.gameIndex+1}/10</div><h2 class="text-5xl font-bold text-white mb-12 drop-shadow-md">🧩 Bina Ayat</h2><div class="w-full max-w-4xl bg-black/10 min-h-[120px] rounded-3xl border-4 border-dashed border-white/50 mb-12 flex items-center justify-center flex-wrap gap-4 p-6">${kotak || '<p class="text-emerald-800/50 font-bold text-2xl">Klik blok di bawah...</p>'}</div><div class="flex justify-center flex-wrap gap-4">${butang}</div>${state.susunJawab.length === DATA_BINA_AYAT[state.gameIndex].length ? `<button onclick="semakSusun()" class="mt-12 bg-white text-emerald-600 px-12 py-5 rounded-full text-3xl font-bold btn-3d border-4 border-emerald-200 pop-in">Semak!</button>`:''}</div>`;
-            } 
-            else if (state.gamePilih === 'mario' || state.gamePilih === 'circus') {
-                const isMario = state.gamePilih === 'mario';
-                const bgClass = isMario ? 'bg-cyan-300' : 'bg-purple-900';
-                const groundClass = isMario ? 'bg-green-500 border-green-700' : 'bg-red-600 border-red-800';
-                const heroIcon = isMario ? '🏃‍♂️' : '🦁';
-                const obsIcon = isMario ? '🍄' : '🔥';
-                const boxIcon = isMario ? '📦' : '🎈';
-                
-                const qs = state.soalanArkedRawak[state.gameIndex];
-                const pilihan = [qs[1], qs[2], qs[3], qs[4]].sort(()=>Math.random()-0.5);
-
-                let heroClass = `text-7xl absolute z-20 transition-transform duration-300 ${state.gameAnim==='lompat' ? 'hero-jump' : ''}`;
-                let htmlDalamGame = '';
-                
-                // Latar sentiasa bergerak kecuali fasa soalan/jawab
-                const isBergerak = state.gamePhase === 'lari' || state.gamePhase === 'kotak_datang';
-
-                if (isBergerak) {
-                    // Halangan hiasan bergerak berulang-ulang
-                    htmlDalamGame += `<div class="text-6xl absolute z-10 obstacle-hiasan" style="bottom: 48px; opacity: 0.8;">${obsIcon}</div>`;
-                }
-
-                if (state.gamePhase === 'kotak_datang') {
-                    // Kotak / Syiling bergerak ke arah pemain
-                    htmlDalamGame += `<div class="text-6xl absolute z-30 box-datang" style="bottom: 120px;">${boxIcon}</div>`;
-                } else if (state.gamePhase === 'soalan' || state.gamePhase === 'jawab_betul' || state.gamePhase === 'jawab_salah') {
-                    // Berhenti tepat di atas watak (Paused)
-                    htmlDalamGame += `<div class="text-6xl absolute z-30" style="bottom: 120px; left: 20%; transform: scale(1.3);">${boxIcon}</div>`;
-                    
-                    if (state.gamePhase === 'soalan') {
-                        htmlDalamGame += `
-                        <div class="absolute inset-0 bg-black/70 z-40 flex flex-col items-center justify-center p-6 pop-in backdrop-blur-sm">
-                            <div class="bg-amber-400 text-amber-900 font-bold px-6 py-2 rounded-full mb-6 border-4 border-white shadow-lg animate-bounce">KOTAK MISTERI!</div>
-                            <h3 class="text-3xl md:text-4xl font-bold text-white mb-8 text-center drop-shadow-md">${qs[0].replace('____', '______')}</h3>
-                            <div class="grid grid-cols-2 gap-4 w-full max-w-2xl mx-auto">
-                                ${pilihan.map(p => `<button onclick="jawabGameArked('${p}')" class="bg-white text-2xl font-bold p-5 rounded-2xl btn-3d text-slate-800 hover:bg-blue-100 border-4 border-slate-200">${p}</button>`).join('')}
-                            </div>
-                        </div>`;
-                    }
-                }
-
-                return `
-                <div class="bg-slate-800 p-8 rounded-[3rem] min-h-[70vh] flex flex-col items-center pop-in card-wow border-8 border-white relative mt-4">
-                    <button onclick="tutupGame()" class="absolute top-6 left-6 text-white bg-white/20 w-12 h-12 rounded-full font-bold btn-3d text-xl z-50">X</button>
-                    <div class="flex justify-between w-full mb-4 text-white font-bold text-2xl z-20"><span>Nyawa: ${'❤️'.repeat(state.gameLives)}</span><span>Soalan: ${state.gameIndex+1}/10</span></div>
-                    
-                    <div class="relative w-full h-80 ${bgClass} rounded-3xl border-4 border-slate-300 overflow-hidden shadow-inner mb-6 ${isBergerak ? 'game-bg-scroll' : ''}" style="background-image: repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(255,255,255,0.2) 100px, rgba(255,255,255,0.2) 200px); background-size: 200px 100%;">
-                        <div class="absolute bottom-0 w-full h-12 ${groundClass} border-t-8 z-10"></div>
-                        <div class="${heroClass}" style="bottom: 40px; left: 20%; ${state.gamePhase==='jawab_salah' ? 'transform: rotate(180deg) opacity(0.5);':''}">${heroIcon}</div>
-                        ${htmlDalamGame}
-                    </div>
-                    
-                    <button onclick="lompatBebas()" class="w-full max-w-sm bg-blue-500 text-white font-bold text-3xl py-6 rounded-3xl btn-3d border-4 border-blue-300 shadow-xl active:bg-blue-600 ${isBergerak ? 'animate-pulse': 'opacity-50 cursor-not-allowed'}" ${isBergerak ? '' : 'disabled'}>LOMPAT!</button>
-                </div>`;
-            }
-            
-            return `<div class="pop-in mt-4"><div class="bg-slate-800 text-white rounded-[2rem] p-10 shadow-2xl mb-10 flex items-center justify-between overflow-hidden relative border-8 border-slate-700"><div class="relative z-10"><h2 class="text-5xl font-bold mb-4 text-amber-400 drop-shadow-md">Taman Arked 🎮</h2><p class="text-2xl font-bold text-slate-300">Permainan animasi bergerak! Pilih misi anda!</p></div><div class="text-9xl absolute right-10 opacity-30 float">🕹️</div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-8"><button onclick="bukaGame('susun')" class="bg-gradient-to-br from-emerald-400 to-teal-500 p-10 rounded-[3rem] border-8 border-white btn-3d card-wow flex flex-col items-center group"><div class="text-8xl mb-6 float-slow bg-white/20 p-6 rounded-full group-hover:scale-110 transition-transform shadow-inner">🧩</div><h3 class="text-3xl font-bold text-white drop-shadow-md mb-2">Bina Ayat</h3></button><button onclick="bukaGame('mario')" class="bg-gradient-to-br from-blue-400 to-indigo-500 p-10 rounded-[3rem] border-8 border-white btn-3d card-wow flex flex-col items-center group"><div class="text-8xl mb-6 float-slow bg-white/20 p-6 rounded-full group-hover:scale-110 transition-transform shadow-inner">🏃‍♂️</div><h3 class="text-3xl font-bold text-white drop-shadow-md mb-2">Larian Mario</h3></button><button onclick="bukaGame('circus')" class="bg-gradient-to-br from-rose-400 to-red-500 p-10 rounded-[3rem] border-8 border-white btn-3d card-wow flex flex-col items-center group"><div class="text-8xl mb-6 float-slow bg-white/20 p-6 rounded-full group-hover:scale-110 transition-transform shadow-inner">🎪</div><h3 class="text-3xl font-bold text-white drop-shadow-md mb-2">Sarkas Hebat</h3></button></div></div>`;
-        }
-
-        window.muatTurunPDF = function() {
-            playSound('click'); const { jsPDF } = window.jspdf; const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-            doc.setFillColor(255, 255, 255); doc.rect(0, 0, 297, 210, 'F'); doc.setDrawColor(30, 58, 138); doc.setLineWidth(4); doc.rect(10, 10, 277, 190); doc.setDrawColor(251, 191, 36); doc.setLineWidth(2); doc.rect(14, 14, 269, 182);
-            doc.setFont("helvetica", "bold"); doc.setTextColor(217, 119, 6); doc.setFontSize(24); doc.text(`ANUGERAH ${state.anugerah.toUpperCase()}`, 270, 30, { align: 'right' });
-            doc.setTextColor(30, 41, 59); doc.setFontSize(36); doc.text("SIJIL KECEMERLANGAN", 148, 50, { align: 'center' }); doc.setFontSize(16); doc.setFont("helvetica", "italic"); doc.text("Dengan ini disahkan bahawa", 148, 70, { align: 'center' }); doc.setFontSize(28); doc.setFont("helvetica", "bold"); doc.setTextColor(67, 56, 202); doc.text(state.user.nama.toUpperCase(), 148, 90, { align: 'center' }); doc.setFontSize(16); doc.setFont("helvetica", "normal"); doc.setTextColor(30, 41, 59); doc.text(`Sekolah: ${state.user.sekolah} | Kelas: ${state.user.kelas}`, 148, 110, { align: 'center' }); doc.text("Telah menamatkan pengembaraan dan menguasai tatabahasa", 148, 130, { align: 'center' }); doc.setFontSize(20); doc.setFont("helvetica", "bold"); doc.text("APLIKASI BIJAK KATA ADJEKTIF", 148, 145, { align: 'center' }); doc.setFontSize(14); doc.setTextColor(100, 116, 139); doc.text(`Pencapaian Bintang: ${state.bintang} Bintang`, 148, 160, { align: 'center' }); doc.setLineWidth(0.5); doc.setDrawColor(0,0,0); doc.line(200, 180, 260, 180); doc.setFontSize(12); doc.text("CIKGU AMIRUL", 230, 186, { align: 'center' }); doc.text("Pengasas Aplikasi", 230, 192, { align: 'center' });
-            doc.save(`Sijil_BijakKataAdjektif_${state.user.nama.replace(/\s+/g, '_')}.pdf`);
-        }
+        // ==========================================
+        // KOD SIJIL & REKOD & MUAT TURUN PDF VEKTOR
+        // ==========================================
         window.cetakSijil = function() { playSound('click'); setTimeout(() => { window.print(); }, 300); }
 
-        function renderSijil() {
-            if(state.bintang < 1) return `<div class="pop-in text-center bg-white p-12 rounded-[3rem] shadow-2xl max-w-2xl mx-auto mt-20 border-8 border-slate-100 card-wow"><div class="text-8xl mb-6">🔒</div><h2 class="text-4xl font-bold text-slate-700 mb-4">Sijil Terkunci!</h2><p class="text-2xl font-bold text-slate-500">Kumpul minimum 1 Bintang. (Bintang anda: ${state.bintang})</p></div>`;
-            let badgeColor = "from-slate-200 to-slate-400"; let badgeBorder = "border-slate-500"; let badgeIcon = "🏅"; let badgeText = "text-slate-600";
-            if (state.anugerah === "Emas") { badgeColor = "from-yellow-300 to-amber-500"; badgeBorder = "border-amber-600"; badgeIcon = "🏆"; badgeText = "text-amber-700"; } else if (state.anugerah === "Perak") { badgeColor = "from-gray-200 to-gray-400"; badgeBorder = "border-gray-500"; badgeIcon = "🥈"; badgeText = "text-gray-700"; } else if (state.anugerah === "Gangsa") { badgeColor = "from-orange-300 to-orange-500"; badgeBorder = "border-orange-700"; badgeIcon = "🥉"; badgeText = "text-orange-800"; }
+        window.muatTurunPDF = function() {
+            playSound('click');
+            if (!window.jspdf) { alert("Sila tunggu sebentar, sistem PDF sedang dimuatkan."); return; }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+            const anugerah = calculateAnugerah(state.bintang);
             const siri = `BKA-${new Date().getFullYear()}-${state.user.nama.length*100}`;
 
-            return `<div id="sijil-cetak-wrapper" class="pop-in pb-10 mt-4"><div class="flex justify-between items-center mb-10 hide-on-print bg-white p-6 rounded-3xl shadow-lg border-4 border-slate-100"><h2 class="text-3xl font-bold text-slate-800"><i class="fa-solid fa-award text-amber-500 text-4xl mr-3"></i> Sijil Lulus!</h2><div class="flex gap-4"><button onclick="muatTurunPDF()" class="bg-slate-800 text-white px-6 py-3 rounded-2xl font-bold btn-3d"><i class="fa-solid fa-download"></i> DOWNLOAD PDF (VEKTOR)</button><button onclick="cetakSijil()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-3 rounded-2xl font-bold btn-3d border-4 border-blue-300"><i class="fa-solid fa-print"></i> CETAK / PRINT</button></div></div><div id="sijil-cetak" class="bg-white w-full max-w-[297mm] h-[210mm] mx-auto p-10 border-[16px] border-indigo-900 rounded-lg relative shadow-2xl text-center overflow-hidden flex flex-col justify-center"><div class="absolute top-10 right-10 flex flex-col items-center"><div class="w-28 h-28 rounded-full border-4 ${badgeBorder} flex items-center justify-center text-5xl shadow-lg bg-gradient-to-br ${badgeColor}">${badgeIcon}</div><span class="font-bold text-xl mt-2 ${badgeText}">Anugerah ${state.anugerah}</span></div><div class="absolute inset-4 border-8 border-amber-400 pointer-events-none rounded-sm"></div><div class="absolute inset-6 border-2 border-amber-200 pointer-events-none rounded-sm"></div><div class="relative z-10 w-full px-12 mt-4"><div class="text-amber-500 text-7xl mb-2"><i class="fa-solid fa-medal"></i></div><h1 class="text-6xl font-bold text-slate-800 tracking-[0.2em] mb-4 uppercase" style="font-family: 'Times New Roman', serif;">SIJIL PENCAPAIAN</h1><p class="text-2xl text-slate-600 font-bold mb-6 italic">Dengan bangganya dianugerahkan kepada</p><h2 class="text-5xl font-bold text-indigo-700 my-4 uppercase border-b-4 border-indigo-200 inline-block px-16 pb-2">${state.user.nama}</h2><p class="text-2xl text-slate-700 font-bold mt-2">Sekolah: <span class="text-indigo-600">${state.user.sekolah}</span> | Kelas: <span class="text-indigo-600">${state.user.kelas}</span></p><p class="text-xl text-slate-600 mt-8 mb-4 font-bold max-w-4xl mx-auto leading-relaxed">Telah berjaya menamatkan pengembaraan dan menguasai tatabahasa dengan cemerlang di dalam aplikasi pendidikan interaktif</p><h3 class="text-3xl font-bold text-slate-800 mb-6 tracking-wider">"BIJAK KATA ADJEKTIF"</h3><div class="bg-amber-100 text-amber-800 font-bold text-2xl px-10 py-3 rounded-full inline-flex items-center gap-3 border-4 border-amber-300">Pencapaian: ${state.bintang} Bintang ⭐</div><div class="flex justify-between items-end mt-12 px-8"><div class="text-left flex flex-col items-center"><div class="w-24 h-24 border-4 border-slate-300 rounded-lg flex items-center justify-center font-bold text-slate-400 mb-2 bg-slate-50"><i class="fa-solid fa-qrcode text-5xl"></i></div><span class="font-bold text-slate-500 text-sm">No. Siri: ${siri}</span></div><div class="text-center"><div class="text-4xl text-indigo-900 mb-1" style="font-family: 'Brush Script MT', cursive;">Amirul</div><div class="w-64 border-b-4 border-slate-800 mb-2"></div><p class="font-bold text-xl text-slate-800 uppercase">CIKGU AMIRUL</p><p class="text-md text-slate-500 font-bold">Pengasas Aplikasi</p></div></div></div></div></div>`;
+            // Warna Latar Belakang & Frame Sijil
+            doc.setFillColor(255, 255, 255); doc.rect(0, 0, 297, 210, 'F');
+            doc.setDrawColor(49, 46, 129); doc.setLineWidth(6); doc.rect(10, 10, 277, 190);
+            doc.setDrawColor(251, 191, 36); doc.setLineWidth(2); doc.rect(14, 14, 269, 182);
+            doc.setDrawColor(253, 230, 138); doc.setLineWidth(0.5); doc.rect(16, 16, 265, 178);
+
+            // Teks Utama
+            doc.setFont("times", "bold"); doc.setFontSize(40); doc.setTextColor(30, 41, 59);
+            doc.text("SIJIL PENCAPAIAN", 148.5, 50, { align: "center" });
+
+            doc.setFont("helvetica", "italic"); doc.setFontSize(16); doc.setTextColor(71, 85, 105);
+            doc.text("Dengan bangganya dianugerahkan kepada", 148.5, 65, { align: "center" });
+
+            doc.setFont("helvetica", "bold"); doc.setFontSize(30); doc.setTextColor(67, 56, 202);
+            doc.text(state.user.nama.toUpperCase(), 148.5, 85, { align: "center" });
+
+            doc.setFont("helvetica", "normal"); doc.setFontSize(14); doc.setTextColor(51, 65, 85);
+            doc.text(`Sekolah: ${state.user.sekolah} | Kelas: ${state.user.kelas}`, 148.5, 100, { align: "center" });
+
+            doc.setFontSize(12); doc.setTextColor(71, 85, 105);
+            doc.text("Telah berjaya menamatkan pengembaraan dan menguasai tatabahasa", 148.5, 115, { align: "center" });
+            doc.text("dengan cemerlang di dalam aplikasi pendidikan interaktif", 148.5, 122, { align: "center" });
+
+            doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.setTextColor(30, 41, 59);
+            doc.text('"BIJAK KATA ADJEKTIF"', 148.5, 138, { align: "center" });
+
+            doc.setFontSize(14); doc.setTextColor(146, 64, 14);
+            doc.text(`Pencapaian: ${state.bintang} Bintang (Anugerah ${anugerah})`, 148.5, 155, { align: "center" });
+
+            // Pengesahan / Footer
+            doc.setFontSize(10); doc.setTextColor(100, 116, 139);
+            doc.text(`No. Siri: ${siri}`, 40, 185, { align: "center" });
+
+            doc.setDrawColor(30, 41, 59); doc.setLineWidth(0.5); doc.line(220, 175, 275, 175);
+            doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(30, 41, 59);
+            doc.text("CIKGU AMIRUL", 247.5, 182, { align: "center" });
+            doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(100, 116, 139);
+            doc.text("Pengasas Aplikasi", 247.5, 188, { align: "center" });
+
+            doc.save(`Sijil_BijakKataAdjektif_${state.user.nama.replace(/\s+/g, '_')}.pdf`);
+        }
+
+        function renderSijil() {
+            if(state.bintang < 1) return `<div class="pop-in text-center bg-white p-12 rounded-[3rem] shadow-2xl max-w-2xl mx-auto mt-20 border-8 border-slate-100 card-wow"><div class="text-8xl mb-6">🔒</div><h2 class="text-4xl font-bold text-slate-700 mb-4">Sijil Terkunci!</h2><p class="text-2xl font-bold text-slate-500">Kumpul 1 Bintang untuk sijil penyertaan. (Bintang anda: ${state.bintang})</p></div>`;
+            let anugerah = calculateAnugerah(state.bintang);
+            let badgeColor = "from-slate-200 to-slate-400"; let badgeBorder = "border-slate-500"; let badgeIcon = "🏅"; let badgeText = "text-slate-600";
+            if (anugerah === "Emas") { badgeColor = "from-yellow-300 to-amber-500"; badgeBorder = "border-amber-600"; badgeIcon = "🏆"; badgeText = "text-amber-700"; } 
+            else if (anugerah === "Perak") { badgeColor = "from-gray-200 to-gray-400"; badgeBorder = "border-gray-500"; badgeIcon = "🥈"; badgeText = "text-gray-700"; } 
+            else if (anugerah === "Gangsa") { badgeColor = "from-orange-300 to-orange-500"; badgeBorder = "border-orange-700"; badgeIcon = "🥉"; badgeText = "text-orange-800"; }
+            const siri = `BKA-${new Date().getFullYear()}-${state.user.nama.length*100}`;
+
+            return `<div id="sijil-cetak-wrapper" class="pop-in pb-10 mt-4"><div class="flex justify-between items-center mb-10 hide-on-print bg-white p-6 rounded-3xl shadow-lg border-4 border-slate-100"><h2 class="text-3xl font-bold text-slate-800"><i class="fa-solid fa-award text-amber-500 text-4xl mr-3"></i> Sijil Lulus!</h2><div class="flex gap-4 flex-wrap"><button onclick="muatTurunPDF()" class="bg-gradient-to-r from-rose-500 to-pink-600 text-white px-6 py-3 rounded-2xl font-bold text-lg btn-3d border-4 border-rose-300 flex items-center gap-2"><i class="fa-solid fa-download"></i> PDF VEKTOR</button><button onclick="cetakSijil()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-2xl font-bold text-lg btn-3d border-4 border-blue-300 flex items-center gap-2"><i class="fa-solid fa-print"></i> CETAK PENCETAK</button></div></div><div id="sijil-cetak" class="bg-white w-full max-w-[297mm] h-[210mm] mx-auto p-10 border-[16px] border-indigo-900 rounded-lg relative shadow-2xl text-center overflow-hidden flex flex-col justify-center"><div class="absolute top-10 right-10 flex flex-col items-center"><div class="w-28 h-28 rounded-full border-4 ${badgeBorder} flex items-center justify-center text-5xl shadow-lg bg-gradient-to-br ${badgeColor}">${badgeIcon}</div><span class="font-bold text-xl mt-2 ${badgeText}">Anugerah ${anugerah}</span></div><div class="absolute inset-4 border-8 border-amber-400 pointer-events-none rounded-sm"></div><div class="absolute inset-6 border-2 border-amber-200 pointer-events-none rounded-sm"></div><div class="relative z-10 w-full px-12 mt-4"><div class="text-amber-500 text-7xl mb-2"><i class="fa-solid fa-medal"></i></div><h1 class="text-6xl font-bold text-slate-800 tracking-[0.2em] mb-4 uppercase" style="font-family: 'Times New Roman', serif;">SIJIL PENCAPAIAN</h1><p class="text-2xl text-slate-600 font-bold mb-6 italic">Dengan bangganya dianugerahkan kepada</p><h2 class="text-5xl font-bold text-indigo-700 my-4 uppercase border-b-4 border-indigo-200 inline-block px-16 pb-2">${state.user.nama}</h2><p class="text-2xl text-slate-700 font-bold mt-2">Sekolah: <span class="text-indigo-600">${state.user.sekolah}</span> | Kelas: <span class="text-indigo-600">${state.user.kelas}</span></p><p class="text-xl text-slate-600 mt-8 mb-4 font-bold max-w-4xl mx-auto leading-relaxed">Telah berjaya menamatkan pengembaraan dan menguasai tatabahasa dengan cemerlang di dalam aplikasi pendidikan interaktif</p><h3 class="text-3xl font-bold text-slate-800 mb-6 tracking-wider">"BIJAK KATA ADJEKTIF"</h3><div class="bg-amber-100 text-amber-800 font-bold text-2xl px-10 py-3 rounded-full inline-flex items-center gap-3 border-4 border-amber-300">Pencapaian: ${state.bintang} Bintang ⭐</div><div class="flex justify-between items-end mt-12 px-8"><div class="text-left flex flex-col items-center"><div class="w-24 h-24 border-4 border-slate-300 rounded-lg flex items-center justify-center font-bold text-slate-400 mb-2 bg-slate-50"><i class="fa-solid fa-qrcode text-5xl"></i></div><span class="font-bold text-slate-500 text-sm">No. Siri: ${siri}</span></div><div class="text-center"><div class="text-4xl text-indigo-900 mb-1" style="font-family: 'Brush Script MT', cursive;">Amirul</div><div class="w-64 border-b-4 border-slate-800 mb-2"></div><p class="font-bold text-xl text-slate-800 uppercase">CIKGU AMIRUL</p><p class="text-md text-slate-500 font-bold">Pengasas Aplikasi</p></div></div></div></div></div>`;
         }
 
         window.tabLogin = 'murid';
@@ -463,22 +360,60 @@
         }
 
         function renderDashboard() {
-            return `<div class="pop-in pb-10"><div class="text-center mb-10"><h2 class="text-5xl font-bold text-white drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)] mb-4 tracking-wide">PETA PENGEMBARAAN</h2><p class="text-2xl font-bold text-blue-100 bg-black/20 inline-block px-6 py-2 rounded-full border-2 border-white/30 backdrop-blur-sm">Pilih misi untuk tebus sijil anugerah!</p></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"><button onclick="setView('nota')" class="bg-gradient-to-br from-emerald-400 to-green-600 p-8 rounded-[3rem] btn-3d border-8 border-white card-wow flex flex-col items-center group"><div class="bg-white/20 w-32 h-32 rounded-full flex items-center justify-center text-7xl mb-6 shadow-inner group-hover:scale-110 transition-transform">🏝️</div><h3 class="text-3xl font-bold text-white drop-shadow-md">Pulau Nota</h3><p class="text-green-100 font-bold mt-2">Gali ilmu Adjektif</p></button><button onclick="setView('latihan')" class="bg-gradient-to-br from-blue-400 to-indigo-600 p-8 rounded-[3rem] btn-3d border-8 border-white card-wow flex flex-col items-center group"><div class="bg-white/20 w-32 h-32 rounded-full flex items-center justify-center text-7xl mb-6 shadow-inner group-hover:scale-110 transition-transform">⚔️</div><h3 class="text-3xl font-bold text-white drop-shadow-md">Gua Latihan</h3><p class="text-blue-100 font-bold mt-2">Uji minda 10 soalan</p></button><button onclick="setView('permainan')" class="bg-gradient-to-br from-purple-400 to-pink-600 p-8 rounded-[3rem] btn-3d border-8 border-white card-wow flex flex-col items-center group"><div class="bg-white/20 w-32 h-32 rounded-full flex items-center justify-center text-7xl mb-6 shadow-inner group-hover:scale-110 transition-transform">🎡</div><h3 class="text-3xl font-bold text-white drop-shadow-md">Taman Arked</h3><p class="text-pink-100 font-bold mt-2">Permainan bergerak!</p></button><button onclick="setView('rekod')" class="sm:col-span-1 lg:col-span-2 bg-gradient-to-br from-rose-400 to-red-600 p-8 rounded-[3rem] btn-3d border-8 border-white card-wow flex flex-col md:flex-row items-center justify-center gap-8 group"><div class="text-7xl group-hover:rotate-12 transition-transform drop-shadow bg-white/20 p-6 rounded-full">🏆</div><div class="text-center md:text-left text-white"><h3 class="text-4xl font-bold drop-shadow">Carta Juara Harta Karun</h3><p class="text-xl font-bold text-rose-100 mt-2">Lihat pencapaian lencana rakan-rakan!</p></div></button><button onclick="setView('sijil')" class="bg-gradient-to-br from-amber-400 to-orange-500 p-8 rounded-[3rem] btn-3d border-8 border-white card-wow flex flex-col items-center group"><div class="text-7xl group-hover:rotate-12 transition-transform drop-shadow bg-white/20 p-6 rounded-full">📜</div><h3 class="text-3xl font-bold text-white drop-shadow-md mt-4">Peti Sijil</h3></button></div></div>`;
+            let anugerah = calculateAnugerah(state.bintang);
+            let badgeBg = "from-slate-200 to-slate-300"; let icon = "🏅"; let textCol = "text-slate-600";
+            if (anugerah === "Emas") { badgeBg = "from-yellow-300 to-amber-500"; icon = "🏆"; textCol = "text-amber-800"; }
+            else if (anugerah === "Perak") { badgeBg = "from-gray-300 to-slate-400"; icon = "🥈"; textCol = "text-slate-800"; }
+            else if (anugerah === "Gangsa") { badgeBg = "from-orange-300 to-orange-500"; icon = "🥉"; textCol = "text-orange-900"; }
+
+            return `<div class="pop-in pb-10"><div class="text-center mb-6"><h2 class="text-5xl font-bold text-white drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)] mb-4 tracking-wide">PETA PENGEMBARAAN</h2></div><div class="max-w-3xl mx-auto bg-gradient-to-r ${badgeBg} p-6 rounded-[2rem] shadow-xl border-4 border-white flex items-center gap-6 mb-10 card-wow"><div class="text-6xl bg-white/40 p-4 rounded-full shadow-inner">${icon}</div><div><h3 class="text-2xl font-bold ${textCol} uppercase tracking-wider">Status Pencapaian Semasa</h3><p class="text-4xl font-bold text-white drop-shadow-md">ANUGERAH ${anugerah.toUpperCase()}</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"><button onclick="setView('nota')" class="bg-gradient-to-br from-emerald-400 to-green-600 p-8 rounded-[3rem] btn-3d border-8 border-white card-wow flex flex-col items-center group"><div class="bg-white/20 w-32 h-32 rounded-full flex items-center justify-center text-7xl mb-6 shadow-inner group-hover:scale-110 transition-transform">🏝️</div><h3 class="text-3xl font-bold text-white drop-shadow-md">Pulau Nota</h3><p class="text-green-100 font-bold mt-2">Gali ilmu Adjektif</p></button><button onclick="setView('latihan')" class="bg-gradient-to-br from-blue-400 to-indigo-600 p-8 rounded-[3rem] btn-3d border-8 border-white card-wow flex flex-col items-center group"><div class="bg-white/20 w-32 h-32 rounded-full flex items-center justify-center text-7xl mb-6 shadow-inner group-hover:scale-110 transition-transform">⚔️</div><h3 class="text-3xl font-bold text-white drop-shadow-md">Gua Latihan</h3><p class="text-blue-100 font-bold mt-2">Uji minda 10 soalan</p></button><button onclick="setView('permainan')" class="bg-gradient-to-br from-purple-400 to-pink-600 p-8 rounded-[3rem] btn-3d border-8 border-white card-wow flex flex-col items-center group"><div class="bg-white/20 w-32 h-32 rounded-full flex items-center justify-center text-7xl mb-6 shadow-inner group-hover:scale-110 transition-transform">🎡</div><h3 class="text-3xl font-bold text-white drop-shadow-md">Taman Arked</h3><p class="text-pink-100 font-bold mt-2">Permainan bergerak!</p></button><button onclick="setView('rekod')" class="sm:col-span-1 lg:col-span-2 bg-gradient-to-br from-rose-400 to-red-600 p-8 rounded-[3rem] btn-3d border-8 border-white card-wow flex flex-col md:flex-row items-center justify-center gap-8 group"><div class="text-7xl group-hover:rotate-12 transition-transform drop-shadow bg-white/20 p-6 rounded-full">🏆</div><div class="text-center md:text-left text-white"><h3 class="text-4xl font-bold drop-shadow">Carta Juara Harta Karun</h3><p class="text-xl font-bold text-rose-100 mt-2">Lihat pencapaian lencana rakan-rakan!</p></div></button><button onclick="setView('sijil')" class="bg-gradient-to-br from-amber-400 to-orange-500 p-8 rounded-[3rem] btn-3d border-8 border-white card-wow flex flex-col items-center group"><div class="text-7xl group-hover:rotate-12 transition-transform drop-shadow bg-white/20 p-6 rounded-full">📜</div><h3 class="text-3xl font-bold text-white drop-shadow-md mt-4">Peti Sijil</h3></button></div></div>`;
         }
 
+        // ==========================================
+        // NOTA INTERAKTIF DENGAN EMOJI VISUAL
+        // ==========================================
         window.bukaNota = function(k) { playSound('pop'); state.notaKey = k; state.notaTab = 1; renderApp(); }
         window.tabNota = function(t) { playSound('click'); state.notaTab = t; renderApp(); }
+        
+        function getEmojiForWord(word) {
+            const m = {
+                "Baik": "😇", "Cerdik": "🧠", "Berani": "🦸‍♂️", "Sihat": "💪", "Lemah": "🤒",
+                "Merah": "🍎", "Biru": "🌊", "Kuning": "🌻", "Hijau": "🍃", "Putih": "☁️",
+                "Panjang": "📏", "Pendek": "🩳", "Besar": "🐘", "Tebal": "📚", "Tinggi": "🦒",
+                "Bulat": "⚽", "Segi tiga": "🔺", "Bujur": "🥚", "Lurus": "➖", "Leper": "🍽️",
+                "Awal": "🌅", "Lambat": "🐢", "Baru": "🎁", "Lama": "📻", "Segera": "⚡",
+                "Jauh": "🔭", "Dekat": "🤝", "Hampir": "🤏", "Nyaris": "😰", "Rapat": "🫂",
+                "Pantas": "🚀", "Perlahan": "🚶", "Gopoh": "🏃", "Laju": "🏎️",
+                "Gembira": "😄", "Sedih": "😢", "Marah": "😡", "Sayang": "🥰", "Takut": "😱",
+                "Manis (Rasa)": "👅", "Bising (Dengar)": "👂", "Kasar (Sentuh)": "✋", "Cantik (Lihat)": "👁️", "Busuk (Bau)": "👃"
+            };
+            return m[word] || '✨';
+        }
 
         function renderNota() {
             if(!state.notaKey) {
                 let html = '';
-                for(let k in KATEGORI) { html += `<button onclick="bukaNota('${k}')" class="bg-gradient-to-br ${KATEGORI[k].warna} p-6 rounded-[2rem] border-4 border-white btn-3d card-wow flex flex-col items-center justify-center group text-center"><span class="text-6xl mb-4 float-slow group-hover:scale-125 transition-transform bg-white/20 p-4 rounded-full shadow-inner">${KATEGORI[k].ikon}</span><h3 class="text-2xl font-bold text-white drop-shadow-md">${KATEGORI[k].nama}</h3></button>`; }
+                for(let k in KATEGORI) html += `<button onclick="bukaNota('${k}')" class="bg-gradient-to-br ${KATEGORI[k].warna} p-6 rounded-[2rem] border-4 border-white btn-3d card-wow flex flex-col items-center justify-center group text-center"><span class="text-6xl mb-4 float-slow group-hover:scale-125 transition-transform bg-white/20 p-4 rounded-full shadow-inner">${KATEGORI[k].ikon}</span><h3 class="text-2xl font-bold text-white drop-shadow-md">${KATEGORI[k].nama}</h3></button>`;
                 return `<div class="pop-in"><h2 class="text-4xl font-bold text-white text-center mb-8 drop-shadow-lg">Pilih Peti Harta (Topik)</h2><div class="grid grid-cols-2 md:grid-cols-3 gap-6">${html}</div></div>`;
             }
             const data = KATEGORI[state.notaKey]; let isi = '';
             if(state.notaTab === 1) isi = `<div class="text-center pop-in"><div class="text-8xl mb-8 float-slow drop-shadow-xl">${data.ikon}</div><h3 class="text-4xl font-bold mb-6 text-slate-800 border-b-4 border-slate-200 inline-block pb-2">Apa itu Kata Adjektif ${data.nama}?</h3><p class="text-2xl font-bold text-slate-600 leading-relaxed max-w-3xl mx-auto bg-slate-50 p-8 rounded-3xl border-4 border-slate-200 shadow-inner">"${data.nota.definisi}"</p></div>`;
             else if(state.notaTab === 2) {
-                let list = data.nota.contoh.map((c,i) => `<div class="bg-gradient-to-r ${data.warna} text-white font-bold text-3xl p-6 rounded-3xl btn-3d shadow-lg border-4 border-white flex flex-col items-center justify-center float-fast" style="animation-delay:${i*0.1}s"><span class="text-5xl mb-2">${c.split(' ')[1]||'✨'}</span><span>${c.split(' ')[0]}</span></div>`).join('');
+                let list = data.nota.contoh.map((c,i) => {
+                    let ikon = getEmojiForWord(c);
+                    let teksDisplay = c;
+                    let deriaLabel = "";
+                    if(c.includes("(")) {
+                        let parts = c.split("(");
+                        teksDisplay = parts[0].trim();
+                        deriaLabel = `<div class="text-sm bg-black/20 rounded-full px-3 py-1 mt-2 font-bold">${parts[1].replace(')','')}</div>`;
+                    }
+                    return `<div class="bg-gradient-to-br ${data.warna} text-white font-bold p-6 rounded-[2rem] btn-3d shadow-xl border-4 border-white flex flex-col items-center justify-center float-fast" style="animation-delay:${i*0.1}s">
+                        <span class="text-6xl mb-3 bg-white/20 p-4 rounded-full drop-shadow-md">${ikon}</span>
+                        <span class="text-3xl drop-shadow-md">${teksDisplay}</span>
+                        ${deriaLabel}
+                    </div>`;
+                }).join('');
                 isi = `<div class="text-center pop-in"><h3 class="text-4xl font-bold mb-10 text-slate-800">5 Contoh Tepat! 🔍</h3><div class="grid grid-cols-2 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">${list}</div></div>`;
             } else if(state.notaTab === 3) {
                 let list = data.nota.ayat.map((a,i) => `<div class="bg-white p-6 rounded-2xl border-l-8 border-[${data.warna.split(' ')[1].replace('to-','')}] shadow-md mb-4 text-left font-bold text-xl text-slate-700 flex items-center gap-4"><div class="bg-slate-100 w-12 h-12 flex items-center justify-center rounded-full text-slate-400 shrink-0">${i+1}</div> <div>${a}</div></div>`).join('');
@@ -487,12 +422,19 @@
             return `<div class="bg-white rounded-[3rem] p-8 shadow-2xl border-8 border-slate-100 pop-in min-h-[75vh] flex flex-col relative card-wow"><button onclick="setView('nota'); state.notaKey=null;" class="absolute top-6 left-6 bg-slate-100 text-slate-500 hover:text-slate-700 w-12 h-12 rounded-full font-bold text-xl flex items-center justify-center btn-3d">⬅</button><div class="flex flex-wrap justify-center gap-4 mb-12 mt-12 bg-slate-100 p-2 rounded-full w-fit mx-auto border-4 border-slate-200"><button onclick="tabNota(1)" class="px-8 py-3 rounded-full font-bold text-xl transition-all ${state.notaTab===1 ? 'bg-white shadow text-blue-600 btn-3d' : 'text-slate-500'}">Definisi</button><button onclick="tabNota(2)" class="px-8 py-3 rounded-full font-bold text-xl transition-all ${state.notaTab===2 ? 'bg-white shadow text-pink-600 btn-3d' : 'text-slate-500'}">5 Contoh Perkataan</button><button onclick="tabNota(3)" class="px-8 py-3 rounded-full font-bold text-xl transition-all ${state.notaTab===3 ? 'bg-white shadow text-emerald-600 btn-3d' : 'text-slate-500'}">5 Contoh Ayat</button></div><div class="flex-grow flex items-center justify-center w-full">${isi}</div></div>`;
         }
 
+        // ==========================================
+        // GUA LATIHAN
+        // ==========================================
         window.mulaLatihan = function(k) { playSound('success'); state.latihanKey = k; state.latihanSoalan = KATEGORI[k].latihan; state.latihanIndex = 0; state.latihanMarkah = 0; state.latihanTamat = false; renderApp(); }
         window.jawabLatihan = function(jawab) {
             const soalan = state.latihanSoalan[state.latihanIndex];
             const betul = jawab === soalan[1]; cetusPopup(betul);
             if(betul) { state.latihanMarkah++; }
-            setTimeout(() => { if(state.latihanIndex + 1 < state.latihanSoalan.length) { state.latihanIndex++; } else { state.latihanTamat = true; tambahBintang(state.latihanMarkah * 2); } renderApp(); }, 1200);
+            setTimeout(() => {
+                if(state.latihanIndex + 1 < state.latihanSoalan.length) { state.latihanIndex++; } 
+                else { state.latihanTamat = true; tambahBintang(state.latihanMarkah * 2); }
+                renderApp();
+            }, 1200);
         }
 
         function renderLatihan() {
@@ -505,7 +447,285 @@
             const qs = state.latihanSoalan[state.latihanIndex];
             const pilihan = [qs[1], qs[2], qs[3], qs[4]].sort(()=>Math.random()-0.5);
             let pBtn = pilihan.map(p => `<button onclick="jawabLatihan('${p}')" class="bg-white text-slate-700 border-4 border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-2xl font-bold p-8 rounded-3xl btn-3d transition-colors text-left">${p}</button>`).join('');
-            return `<div class="bg-white p-10 rounded-[3rem] max-w-4xl mx-auto shadow-2xl border-8 border-slate-100 pop-in card-wow mt-4 relative"><div class="flex justify-between items-center mb-10 bg-slate-100 p-4 rounded-2xl border-4 border-slate-200"><span class="text-2xl font-bold text-slate-500">Soalan ${state.latihanIndex + 1} / 10</span><span class="text-2xl font-bold text-amber-500 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200"><i class="fa-solid fa-star"></i> Skor: ${state.latihanMarkah}</span></div><h3 class="text-4xl font-bold text-slate-800 mb-10 leading-snug text-center">${qs[0].replace('____', '<span class="border-b-4 border-dashed border-blue-500 text-blue-500">______</span>')}</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6">${pBtn}</div></div>`;
+            return `
+            <div class="bg-white p-10 rounded-[3rem] max-w-4xl mx-auto shadow-2xl border-8 border-slate-100 pop-in card-wow mt-4 relative">
+                <button onclick="mintaKeluar('latihan')" class="absolute top-6 right-6 text-white bg-rose-500 hover:bg-rose-600 w-12 h-12 rounded-full font-bold btn-3d text-xl z-50 flex items-center justify-center border-2 border-white">❌</button>
+                <div class="flex justify-center md:justify-start items-center mb-10 bg-slate-100 p-4 rounded-2xl border-4 border-slate-200 gap-6 w-max">
+                    <span class="text-2xl font-bold text-slate-500">Soalan ${state.latihanIndex + 1} / 10</span>
+                    <span class="text-2xl font-bold text-amber-500 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200"><i class="fa-solid fa-star"></i> Skor: ${state.latihanMarkah}</span>
+                </div>
+                <h3 class="text-4xl font-bold text-slate-800 mb-10 leading-snug text-center">${qs[0].replace('____', '<span class="border-b-4 border-dashed border-blue-500 text-blue-500">______</span>')}</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">${pBtn}</div>
+            </div>`;
+        }
+
+        // ========================================================
+        // ARKED INTERAKTIF: PHYSICS ENGINE SEBENAR (Mario / Circus)
+        // ========================================================
+        window.bukaGame = function(g) {
+            playSound('pop'); state.gamePilih = g; 
+            state.gameIndex = 0; state.gameScore = 0; state.gameLives = 3; state.gameTamat = false; 
+            state.gamePhase = 'lari';
+            
+            // Setup Timer
+            state.gameMasaKini = 0;
+            if(state.gameTimerInterval) clearInterval(state.gameTimerInterval);
+            state.gameTimerInterval = setInterval(() => {
+                if(state.gamePhase !== 'soalan' && !state.gameTamat && !state.showPopup && !state.exitConfirm.show) {
+                    state.gameMasaKini++;
+                    const el = document.getElementById('gameTimerDisplay');
+                    if(el) el.innerText = formatMasa(state.gameMasaKini);
+                }
+            }, 1000);
+
+            if(g === 'susun') {
+                state.susunAyat = [...DATA_BINA_AYAT[0]].sort(()=>Math.random()-0.5); state.susunJawab = [];
+            } else if (g === 'mario' || g === 'circus') {
+                state.soalanRawak = [...(g === 'mario' ? DATA_GAME_MARIO : DATA_GAME_CIRCUS)].sort(()=>Math.random()-0.5);
+                state.gameEngineState = {
+                    keys: { left: false, right: false, up: false },
+                    player: { x: 100, y: 0, vx: 0, vy: 0, isJumping: false },
+                    cameraX: 0,
+                    obstacles: Array.from({length: 10}, (_, i) => ({ x: 600 + (i*800), active: true, qIndex: i })),
+                    animId: null
+                };
+                startGameEngine();
+            }
+            renderApp();
+        }
+
+        window.startGameEngine = function() {
+            if(state.gameEngineState.animId) cancelAnimationFrame(state.gameEngineState.animId);
+            
+            window.removeEventListener('keydown', handleKD); window.removeEventListener('keyup', handleKU);
+            window.addEventListener('keydown', handleKD); window.addEventListener('keyup', handleKU);
+            
+            function loop() {
+                if(state.view !== 'permainan' || (state.gamePilih !== 'mario' && state.gamePilih !== 'circus')) {
+                    window.removeEventListener('keydown', handleKD); window.removeEventListener('keyup', handleKU);
+                    return; 
+                }
+                
+                if(state.gamePhase === 'lari' && !state.showPopup && !state.exitConfirm.show && !state.gameTamat) {
+                    let p = state.gameEngineState.player; let k = state.gameEngineState.keys;
+                    
+                    // Fizik: Graviti dan Pergerakan X
+                    p.y += p.vy; p.vy -= 1.5; 
+                    if(p.y <= 0) { p.y = 0; p.vy = 0; p.isJumping = false; }
+                    
+                    if(k.right) p.vx = 8; else if(k.left) p.vx = -8; else p.vx = 0;
+                    if(p.x + p.vx < 0) p.vx = 0; // Halangundur tak terhingga
+                    p.x += p.vx;
+                    
+                    // Kamera mengekori pemain
+                    state.gameEngineState.cameraX = p.x - 150;
+                    if(state.gameEngineState.cameraX < 0) state.gameEngineState.cameraX = 0;
+                    
+                    // Pelanggaran Checkpoint (Soalan)
+                    for(let i=0; i<state.gameEngineState.obstacles.length; i++) {
+                        let obs = state.gameEngineState.obstacles[i];
+                        if(obs.active && p.x >= obs.x) {
+                            obs.active = false; 
+                            k.right = false; k.left = false; k.up = false; p.vx = 0; // Pause physics
+                            triggerSoalan(obs.qIndex);
+                            break;
+                        }
+                    }
+                    
+                    // Update DOM (Smooth 60fps)
+                    const pEl = document.getElementById('game-player');
+                    const wEl = document.getElementById('game-world');
+                    const bgEl = document.getElementById('game-bg');
+                    
+                    if(pEl) pEl.style.transform = "translate(" + p.x + "px, " + (-p.y) + "px)";
+                    if(wEl) wEl.style.transform = "translateX(" + (-state.gameEngineState.cameraX) + "px)";
+                    if(bgEl) bgEl.style.backgroundPosition = (-state.gameEngineState.cameraX * 0.5) + "px 0";
+                    
+                    state.gameEngineState.obstacles.forEach((o, i) => {
+                        const oEl = document.getElementById('obs-' + i);
+                        if(oEl && !o.active && oEl.style.opacity !== '0') {
+                            oEl.style.opacity = '0'; oEl.style.transform = 'translateY(-50px) scale(1.5)';
+                        }
+                    });
+                }
+                state.gameEngineState.animId = requestAnimationFrame(loop);
+            }
+            state.gameEngineState.animId = requestAnimationFrame(loop);
+        }
+
+        function handleKD(e) {
+            if(state.gamePhase !== 'lari' || state.exitConfirm.show || state.showPopup) return;
+            if(e.key === 'ArrowRight') state.gameEngineState.keys.right = true;
+            if(e.key === 'ArrowLeft') state.gameEngineState.keys.left = true;
+            if(e.key === 'ArrowUp' || e.key === ' ') loncatTekan();
+        }
+        function handleKU(e) {
+            if(e.key === 'ArrowRight') state.gameEngineState.keys.right = false;
+            if(e.key === 'ArrowLeft') state.gameEngineState.keys.left = false;
+        }
+        window.loncatTekan = function() {
+            if(state.gamePhase === 'lari' && !state.gameEngineState.player.isJumping) {
+                state.gameEngineState.player.vy = 22; state.gameEngineState.player.isJumping = true; playSound('pop');
+            }
+        }
+
+        function triggerSoalan(index) {
+            state.gamePhase = 'soalan';
+            state.gameIndex = index;
+            renderApp();
+        }
+
+        window.jawabGame = function(jawapan) {
+            if(state.gameTamat) return;
+            let qs = state.soalanRawak[state.gameIndex];
+            let betul = (jawapan === qs[1]);
+            
+            cetusPopup(betul);
+            if(betul) { playSound('success'); state.gameScore++; } 
+            else { playSound('error'); state.gameLives--; }
+
+            setTimeout(() => {
+                if(state.gameLives <= 0 || state.gameIndex + 1 >= 10) {
+                    state.gameTamat = true; tambahBintang(state.gameScore * 2);
+                    if(state.gameTimerInterval) clearInterval(state.gameTimerInterval);
+                } else {
+                    state.gamePhase = 'lari';
+                }
+                renderApp();
+            }, 1200);
+        }
+
+        window.klikSusun = function(perkataan, i) { playSound('click'); state.susunJawab.push(perkataan); state.susunAyat[i] = null; renderApp(); }
+        window.semakSusun = function() {
+            const asal = DATA_BINA_AYAT[state.gameIndex].join(' '); const jawab = state.susunJawab.join(' '); const betul = asal === jawab;
+            cetusPopup(betul);
+            setTimeout(() => {
+                if(betul) {
+                    state.gameScore++;
+                    if(state.gameIndex + 1 < 10) { state.gameIndex++; state.susunAyat = [...DATA_BINA_AYAT[state.gameIndex]].sort(()=>Math.random()-0.5); state.susunJawab = []; } 
+                    else { state.gameTamat = true; tambahBintang(state.gameScore * 3); if(state.gameTimerInterval) clearInterval(state.gameTimerInterval); }
+                } else {
+                    state.gameLives--;
+                    if(state.gameLives <= 0) { state.gameTamat = true; tambahBintang(state.gameScore * 3); if(state.gameTimerInterval) clearInterval(state.gameTimerInterval); }
+                    else { state.susunAyat = state.susunJawab.filter(x=>x).concat(state.susunAyat.filter(x=>x)).sort(()=>Math.random()-0.5); state.susunJawab = []; }
+                }
+                renderApp();
+            }, 1200);
+        }
+
+        function renderPermainan() {
+            if(state.gameTamat) return `<div class="bg-white p-12 text-center max-w-2xl mx-auto rounded-[3rem] border-8 border-blue-400 pop-in mt-10 card-wow"><div class="text-8xl mb-6">🏁</div><h2 class="text-5xl font-bold mb-4 text-slate-800">Permainan Tamat!</h2><p class="text-2xl font-bold text-slate-500 mb-2">Masa Keseluruhan: <span class="text-blue-500">${formatMasa(state.gameMasaKini)}</span></p><p class="text-3xl font-bold text-slate-500 mb-6">Markah: ${state.gameScore}/10</p><p class="text-2xl font-bold text-blue-500 mb-10">Bintang diperoleh: +${state.gamePilih==='susun'? state.gameScore*3 : state.gameScore*2} ⭐</p><button onclick="sahKeluar()" class="bg-blue-500 text-white px-10 py-5 font-bold text-2xl rounded-full btn-3d">Kembali Keluar</button></div>`;
+
+            if(state.gamePilih === 'susun') {
+                let kotak = state.susunJawab.map(s => `<div class="bg-white px-6 py-4 rounded-2xl text-3xl font-bold text-emerald-700 card-wow border-4 border-emerald-200 pop-in">${s}</div>`).join('');
+                let butang = state.susunAyat.map((p,i) => p ? `<button onclick="klikSusun('${p}', ${i})" class="bg-amber-400 text-amber-900 px-8 py-4 text-3xl font-bold rounded-2xl btn-3d border-4 border-white mx-2">${p}</button>` : `<div class="w-32 mx-2"></div>`).join('');
+                return `<div class="bg-gradient-to-b from-emerald-400 to-teal-500 p-10 rounded-[3rem] min-h-[70vh] flex flex-col items-center justify-center pop-in card-wow border-8 border-white relative mt-4">
+                    <button onclick="mintaKeluar('game')" class="absolute top-6 right-6 text-white bg-rose-500 hover:bg-rose-600 w-12 h-12 rounded-full font-bold btn-3d text-xl z-50 flex items-center justify-center border-2 border-white">❌</button>
+                    <div class="absolute top-6 left-6 text-white font-bold text-2xl bg-black/20 px-6 py-2 rounded-full flex flex-col items-start md:flex-row md:items-center gap-2 md:gap-4 z-50">
+                        <span class="flex items-center gap-2"><i class="fa-regular fa-clock"></i> <span id="gameTimerDisplay">${formatMasa(state.gameMasaKini)}</span></span>
+                        <span>❤️ ${state.gameLives}</span>
+                        <span>Soalan ${state.gameIndex+1}/10</span>
+                    </div>
+                    <h2 class="text-5xl font-bold text-white mb-12 drop-shadow-md">🧩 Bina Ayat</h2><div class="w-full max-w-4xl bg-black/10 min-h-[120px] rounded-3xl border-4 border-dashed border-white/50 mb-12 flex items-center justify-center flex-wrap gap-4 p-6">${kotak || '<p class="text-emerald-800/50 font-bold text-2xl">Klik blok di bawah...</p>'}</div><div class="flex justify-center flex-wrap gap-4">${butang}</div>${state.susunJawab.length === DATA_BINA_AYAT[state.gameIndex].length ? `<button onclick="semakSusun()" class="mt-12 bg-white text-emerald-600 px-12 py-5 rounded-full text-3xl font-bold btn-3d border-4 border-emerald-200 pop-in">Semak!</button>`:''}</div>`;
+            } 
+            else if (state.gamePilih === 'mario' || state.gamePilih === 'circus') {
+                const isMario = state.gamePilih === 'mario';
+                const bgClass = isMario ? 'bg-cyan-300' : 'bg-purple-900';
+                const groundClass = isMario ? 'bg-green-500 border-green-700' : 'bg-red-600 border-red-800';
+                const heroIcon = isMario ? '🏃‍♂️' : '🦁'; const boxIcon = isMario ? '📦' : '🎈';
+
+                let bgPos = -state.gameEngineState.cameraX * 0.5;
+                let qs = state.soalanRawak[state.gameIndex];
+                let pilihanHtml = '';
+                if(state.gamePhase === 'soalan') {
+                    const pilihan = [qs[1], qs[2], qs[3], qs[4]].sort(()=>Math.random()-0.5);
+                    pilihanHtml = `<div class="absolute inset-0 bg-black/80 z-40 flex flex-col items-center justify-center p-6 pop-in">
+                        <h3 class="text-3xl font-bold text-white mb-8 text-center drop-shadow-md max-w-2xl leading-relaxed">${qs[0].replace('____', '______')}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
+                            ${pilihan.map(p => `<button onclick="jawabGame('${p}')" class="bg-white text-xl md:text-2xl font-bold p-6 rounded-xl btn-3d text-slate-800 hover:bg-amber-100 border-4 border-slate-200">${p}</button>`).join('')}
+                        </div>
+                    </div>`;
+                }
+
+                return `
+                <div class="bg-slate-800 p-8 rounded-[3rem] min-h-[70vh] flex flex-col items-center pop-in card-wow border-8 border-white relative mt-4">
+                    <button onclick="mintaKeluar('game')" class="absolute top-6 right-6 text-white bg-rose-500 hover:bg-rose-600 w-12 h-12 rounded-full font-bold btn-3d text-xl z-[60] flex items-center justify-center border-2 border-white">❌</button>
+                    <div class="flex flex-col md:flex-row justify-start w-full mb-4 text-white font-bold text-2xl z-20 gap-2 items-start">
+                        <span class="bg-black/30 px-4 py-2 rounded-full flex items-center gap-3"><i class="fa-regular fa-clock"></i> <span id="gameTimerDisplay">${formatMasa(state.gameMasaKini)}</span></span>
+                        <div class="flex gap-4 bg-black/30 px-4 py-2 rounded-full"><span>Nyawa: ${'❤️'.repeat(state.gameLives)}</span> <span>| Soalan: ${state.gameIndex+1}/10</span></div>
+                    </div>
+
+                    <div id="game-bg" class="relative w-full h-[400px] ${bgClass} rounded-3xl border-4 border-slate-300 overflow-hidden shadow-inner mb-6" style="background-image: repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(255,255,255,0.2) 100px, rgba(255,255,255,0.2) 200px); background-size: 200px 100%; background-position: ${bgPos}px 0;">
+                        <div class="absolute bottom-0 w-full h-12 ${groundClass} border-t-8 z-30"></div>
+                        <div id="game-world" class="absolute inset-0 z-10" style="transform: translateX(${-state.gameEngineState.cameraX}px);">
+                            <div id="game-player" class="absolute z-20 text-7xl origin-bottom" style="bottom: 48px; left: 0px; transform: translate(${state.gameEngineState.player.x}px, ${-state.gameEngineState.player.y}px);">${heroIcon}</div>
+                            ${state.gameEngineState.obstacles.map((obs, i) => `<div id="obs-${i}" class="absolute z-10 text-6xl transition-all duration-300" style="bottom: 48px; left: ${obs.x}px; opacity: ${obs.active ? '1' : '0'};">${boxIcon}</div>`).join('')}
+                        </div>
+                        ${pilihanHtml}
+                    </div>
+                    
+                    ${state.gamePhase === 'lari' && !state.gameTamat ? `
+                    <div class="text-slate-400 font-bold mb-2 hidden md:block">Gunakan kekunci ⬅️ ➡️ untuk bergerak dan ⬆️ untuk melompat. Sentuh kotak misteri!</div>
+                    <div class="flex justify-between items-center w-full max-w-lg px-4 hide-on-desktop">
+                        <div class="flex gap-4">
+                            <button onmousedown="state.gameEngineState.keys.left=true" onmouseup="state.gameEngineState.keys.left=false" ontouchstart="state.gameEngineState.keys.left=true; event.preventDefault();" ontouchend="state.gameEngineState.keys.left=false; event.preventDefault();" class="w-16 h-16 bg-slate-600 text-white rounded-full text-3xl btn-3d shadow flex items-center justify-center">⬅️</button>
+                            <button onmousedown="state.gameEngineState.keys.right=true" onmouseup="state.gameEngineState.keys.right=false" ontouchstart="state.gameEngineState.keys.right=true; event.preventDefault();" ontouchend="state.gameEngineState.keys.right=false; event.preventDefault();" class="w-16 h-16 bg-slate-600 text-white rounded-full text-3xl btn-3d shadow flex items-center justify-center">➡️</button>
+                        </div>
+                        <button onmousedown="loncatTekan()" ontouchstart="loncatTekan(); event.preventDefault();" class="w-20 h-20 bg-amber-400 text-amber-900 rounded-full text-4xl btn-3d shadow-xl border-4 border-white flex items-center justify-center font-bold">⬆️</button>
+                    </div>
+                    ` : ''}
+                </div>`;
+            }
+
+            return `<div class="pop-in mt-4"><div class="bg-slate-800 text-white rounded-[2rem] p-10 shadow-2xl mb-10 flex items-center justify-between overflow-hidden relative border-8 border-slate-700"><div class="relative z-10"><h2 class="text-5xl font-bold mb-4 text-amber-400 drop-shadow-md">Taman Arked 🎮</h2><p class="text-2xl font-bold text-slate-300">Permainan animasi bergerak! Pilih misi anda!</p></div><div class="text-9xl absolute right-10 opacity-30 float">🕹️</div></div><div class="grid grid-cols-1 md:grid-cols-3 gap-8"><button onclick="bukaGame('susun')" class="bg-gradient-to-br from-emerald-400 to-teal-500 p-10 rounded-[3rem] border-8 border-white btn-3d card-wow flex flex-col items-center group"><div class="text-8xl mb-6 float-slow bg-white/20 p-6 rounded-full group-hover:scale-110 transition-transform shadow-inner">🧩</div><h3 class="text-3xl font-bold text-white drop-shadow-md mb-2">Bina Ayat</h3></button><button onclick="bukaGame('mario')" class="bg-gradient-to-br from-blue-400 to-indigo-500 p-10 rounded-[3rem] border-8 border-white btn-3d card-wow flex flex-col items-center group"><div class="text-8xl mb-6 float-slow bg-white/20 p-6 rounded-full group-hover:scale-110 transition-transform shadow-inner">🏃‍♂️</div><h3 class="text-3xl font-bold text-white drop-shadow-md mb-2">Larian Mario</h3></button><button onclick="bukaGame('circus')" class="bg-gradient-to-br from-rose-400 to-red-500 p-10 rounded-[3rem] border-8 border-white btn-3d card-wow flex flex-col items-center group"><div class="text-8xl mb-6 float-slow bg-white/20 p-6 rounded-full group-hover:scale-110 transition-transform shadow-inner">🎪</div><h3 class="text-3xl font-bold text-white drop-shadow-md mb-2">Sarkas Hebat</h3></button></div></div>`;
+        }
+
+        // =====================================
+        // PANEL ADMIN
+        // =====================================
+        function fetchAdmin() {
+            state.adminLoading = true; renderApp();
+            fetch(SCRIPT_URL + "?t=" + new Date().getTime()).then(r=>r.json()).then(d => { state.adminData = d; state.adminLoading = false; renderApp(); }).catch(e => { state.adminLoading = false; console.log("Gagal ambil data"); renderApp(); });
+        }
+        window.bukaModalEdit = function(topik, idx, asal) {
+            playSound('click');
+            const html = `
+            <div id="modal-edit" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4">
+                <div class="bg-white p-8 rounded-[2rem] w-full max-w-lg pop-in border-8 border-blue-400">
+                    <h3 class="text-2xl font-bold mb-4 text-slate-800">Edit Soalan</h3>
+                    <p class="text-slate-500 mb-2 font-bold bg-slate-100 px-4 py-2 rounded-lg">Topik: ${topik}</p>
+                    <textarea id="editTeks" class="w-full border-4 border-slate-200 rounded-xl p-4 text-lg font-bold mb-6 h-32 focus:border-blue-400 outline-none">${asal}</textarea>
+                    <div class="flex gap-4 justify-end">
+                        <button onclick="document.getElementById('modal-edit').remove();" class="px-6 py-3 bg-slate-200 font-bold rounded-xl btn-3d">Batal</button>
+                        <button onclick="simpanEdit('${topik}', ${idx})" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl btn-3d">Simpan ke Google Sheet</button>
+                    </div>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+        window.simpanEdit = function(topik, index) {
+            const txt = document.getElementById('editTeks').value;
+            if(txt) {
+                fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'edit_soalan', topik: topik, index: index, soalan: txt, jawapan: 'Betul', salah1:'Salah1', salah2:'Salah2', salah3:'Salah3' }) });
+                document.getElementById('modal-edit').remove();
+                cetusPopup(true);
+            }
+        }
+
+        function renderAdmin() {
+            if(state.adminLoading) return `<div class="text-center py-20 text-3xl font-bold text-white">Memuatkan Pangkalan Data... 🚀</div>`;
+            const rekod = state.adminData.rekod || JSON.parse(localStorage.getItem('bka_rekod') || '[]'); const soalan = state.adminData.soalan_edit || [];
+            let e = 0, p = 0, g = 0; rekod.forEach(r => { if(r.anugerah==='Emas')e++; else if(r.anugerah==='Perak')p++; else if(r.anugerah==='Gangsa')g++; }); const total = Math.max(e+p+g, 1);
+            let htmlSoalan = '';
+            for(let key in KATEGORI) {
+                htmlSoalan += `<h3 class="font-bold text-xl text-emerald-400 mt-4 mb-2">${KATEGORI[key].nama}</h3>`;
+                KATEGORI[key].latihan.forEach((q, idx) => {
+                    let textDipapar = q[0]; let editJumpa = soalan.find(s => s.topik === key && parseInt(s.index) === idx);
+                    if(editJumpa) textDipapar = editJumpa.soalan;
+                    htmlSoalan += `<div class="bg-slate-700 p-3 rounded-xl mb-2 flex justify-between items-center text-sm"><div class="font-bold text-white w-3/4">${idx+1}. ${textDipapar}</div><button onclick="bukaModalEdit('${key}', ${idx}, '${textDipapar.replace(/'/g, "\\'")}')" class="bg-blue-500 px-4 py-2 rounded-lg font-bold text-white btn-3d text-xs">Edit</button></div>`;
+                });
+            }
+            return `<div class="pop-in grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-white rounded-[2rem] p-8 shadow-xl border-4 border-slate-100 card-wow text-center"><h2 class="text-2xl font-bold text-slate-800 mb-6 border-b-2 pb-4">📊 Analisis Anugerah</h2><div class="flex items-end justify-around h-48 bar-chart-bg p-4 rounded-xl border border-slate-200"><div class="w-12 bg-yellow-400 rounded-t-lg relative" style="height: ${(e/total)*100}%"><span class="absolute -top-6 w-full text-center font-bold text-yellow-600">${e}</span></div><div class="w-12 bg-slate-400 rounded-t-lg relative" style="height: ${(p/total)*100}%"><span class="absolute -top-6 w-full text-center font-bold text-slate-600">${p}</span></div><div class="w-12 bg-orange-400 rounded-t-lg relative" style="height: ${(g/total)*100}%"><span class="absolute -top-6 w-full text-center font-bold text-orange-600">${g}</span></div></div><div class="flex justify-around mt-4 font-bold text-slate-500 text-sm"><span>Emas</span><span>Perak</span><span>Gangsa</span></div></div><div class="bg-white rounded-[2rem] p-8 shadow-xl border-4 border-slate-100 card-wow"><h2 class="text-2xl font-bold text-slate-800 mb-6 border-b-2 pb-4">🏆 Status Terkini</h2><div class="max-h-48 overflow-y-auto">${rekod.slice(0,5).map((r,i) => `<div class="flex justify-between items-center bg-slate-50 p-3 mb-2 rounded-xl border border-slate-200"><b>#${i+1} ${r.nama}</b><span class="text-amber-500 font-bold">${r.anugerah}</span></div>`).join('')}</div></div><div class="md:col-span-2 bg-slate-800 text-white rounded-[2rem] p-8 shadow-xl border-4 border-slate-700 card-wow"><h2 class="text-2xl font-bold text-amber-400 mb-6">⚙️ Edit 90 Soalan Latihan</h2><div class="max-h-96 overflow-y-auto pr-4">${htmlSoalan}</div></div></div>`;
         }
 
         function renderRekod() {
@@ -525,7 +745,7 @@
             if (!state.user || state.view === 'login') html = renderLogin();
             else { html += renderHeader(); html += '<main class="flex-grow w-full max-w-6xl mx-auto p-4 md:p-6 mt-4 relative z-10">'; if (state.view === 'dashboard') html += renderDashboard(); else if (state.view === 'admin') html += renderAdmin(); else if (state.view === 'nota') html += renderNota(); else if (state.view === 'latihan') html += renderLatihan(); else if (state.view === 'permainan') html += renderPermainan(); else if (state.view === 'rekod') html += renderRekod(); else if (state.view === 'sijil') html += renderSijil(); html += '</main>'; html += `<footer class="text-center py-6 text-white font-bold hide-on-print opacity-80 mt-auto">Dibangunkan oleh CikguAmirul@2026</footer>`; }
             app.innerHTML = html;
-            let popupDiv = document.getElementById('global-popup'); if(!popupDiv) { popupDiv = document.createElement('div'); popupDiv.id = 'global-popup'; document.body.appendChild(popupDiv); } popupDiv.innerHTML = renderPopUp() + renderEditModal();
+            let popupDiv = document.getElementById('global-popup'); if(!popupDiv) { popupDiv = document.createElement('div'); popupDiv.id = 'global-popup'; document.body.appendChild(popupDiv); } popupDiv.innerHTML = renderPopUp() + renderExitConfirm();
         }
         renderApp();
     </script>
